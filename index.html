@@ -4,85 +4,65 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0a0e14">
+<meta name="format-detection" content="telephone=no">
+<meta name="msapplication-tap-highlight" content="no">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="Перекуп — симулятор рынка. Покупай дешевле, продавай дороже.">
-<title>Перекуп</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<meta name="description" content="Reseller Simulator — симулятор рынка. Покупай дешевле, продавай дороже.">
+<title>Reseller Simulator</title>
+<link rel="manifest" href="manifest.json">
 <style>
   :root, [data-theme="light"] {
-    --bg: #f5f6f8;
-    --surface: #ffffff;
-    --surface-2: #f1f3f6;
-    --surface-3: #e8ebef;
-    --text: #0f172a;
-    --text-2: #475569;
-    --text-3: #94a3b8;
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
-    --primary-soft: #dbeafe;
-    --green: #059669;
-    --green-soft: #d1fae5;
-    --red: #dc2626;
-    --red-soft: #fee2e2;
-    --yellow: #d97706;
-    --yellow-soft: #fef3c7;
-    --purple: #7c3aed;
-    --purple-soft: #ede9fe;
-    --border: #e2e8f0;
-    --border-2: #cbd5e1;
+    --bg: #f5f6f8; --surface: #ffffff; --surface-2: #f1f3f6; --surface-3: #e8ebef;
+    --text: #0f172a; --text-2: #475569; --text-3: #94a3b8;
+    --primary: #2563eb; --primary-hover: #1d4ed8; --primary-soft: #dbeafe;
+    --green: #059669; --green-soft: #d1fae5;
+    --red: #dc2626; --red-soft: #fee2e2;
+    --yellow: #d97706; --yellow-soft: #fef3c7;
+    --purple: #7c3aed; --purple-soft: #ede9fe;
+    --border: #e2e8f0; --border-2: #cbd5e1;
     --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
     --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
     --shadow-lg: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
-    --bubble-other: #f1f3f6;
-    --bubble-me: #2563eb;
-    --bubble-me-text: #ffffff;
+    --bubble-other: #f1f3f6; --bubble-me: #2563eb; --bubble-me-text: #ffffff;
   }
   [data-theme="dark"] {
-    --bg: #0a0e14;
-    --surface: #151b25;
-    --surface-2: #1c2430;
-    --surface-3: #252e3d;
-    --text: #f1f5f9;
-    --text-2: #94a3b8;
-    --text-3: #64748b;
-    --primary: #60a5fa;
-    --primary-hover: #93c5fd;
-    --primary-soft: #1e3a5f;
-    --green: #34d399;
-    --green-soft: #064e3b;
-    --red: #f87171;
-    --red-soft: #7f1d1d;
-    --yellow: #fbbf24;
-    --yellow-soft: #78350f;
-    --purple: #a78bfa;
-    --purple-soft: #3b1e6e;
-    --border: #232d3d;
-    --border-2: #344256;
+    --bg: #0a0e14; --surface: #151b25; --surface-2: #1c2430; --surface-3: #252e3d;
+    --text: #f1f5f9; --text-2: #94a3b8; --text-3: #64748b;
+    --primary: #60a5fa; --primary-hover: #93c5fd; --primary-soft: #1e3a5f;
+    --green: #34d399; --green-soft: #064e3b;
+    --red: #f87171; --red-soft: #7f1d1d;
+    --yellow: #fbbf24; --yellow-soft: #78350f;
+    --purple: #a78bfa; --purple-soft: #3b1e6e;
+    --border: #232d3d; --border-2: #344256;
     --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
     --shadow: 0 1px 3px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.2);
     --shadow-lg: 0 4px 12px rgba(0,0,0,.4), 0 2px 4px rgba(0,0,0,.2);
-    --bubble-other: #1c2430;
-    --bubble-me: #2563eb;
-    --bubble-me-text: #ffffff;
+    --bubble-other: #1c2430; --bubble-me: #2563eb; --bubble-me-text: #ffffff;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
   input, textarea { -webkit-user-select: text; user-select: text; }
-  html, body { margin: 0; height: 100%; overflow: hidden; }
+  html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
     background: var(--bg); color: var(--text);
     display: flex; flex-direction: column;
-    height: 100dvh; padding-top: env(safe-area-inset-top);
+    height: 100dvh;
+    padding-top: max(env(safe-area-inset-top), 24px);
+    padding-bottom: env(safe-area-inset-bottom);
     font-size: 14px; -webkit-font-smoothing: antialiased;
     transition: background .2s, color .2s;
+    -webkit-touch-callout: none;
   }
+  ::-webkit-scrollbar { display: none; }
   button { will-change: transform; }
+  
   .app-header { flex-shrink: 0; padding: 12px 16px 10px; background: var(--bg); border-bottom: 1px solid var(--border); }
   .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .app-title { font-size: 17px; font-weight: 700; letter-spacing: -.02em; display: flex; align-items: center; gap: 6px; }
-  .app-title .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
-  .header-stats { display: flex; gap: 6px; }
+  .app-title { font-size: 16px; font-weight: 700; letter-spacing: -.02em; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .app-title .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px var(--green-soft); flex-shrink: 0; }
+  .header-stats { display: flex; gap: 6px; flex-shrink: 0; }
   .chip { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; }
   .chip.money { background: var(--green-soft); color: var(--green); border-color: transparent; }
   .chip.money.neg { background: var(--red-soft); color: var(--red); }
@@ -94,19 +74,27 @@
   .banner { display: flex; align-items: center; gap: 8px; padding: 8px 12px; margin-top: 8px; border-radius: 10px; font-size: 12px; font-weight: 500; }
   .banner.event { background: var(--yellow-soft); color: var(--yellow); }
   .banner.debt { background: var(--red-soft); color: var(--red); }
+  
   .app-main { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 16px 24px; overscroll-behavior: contain; }
   .panel { display: flex; flex-direction: column; gap: 10px; }
   .section-title { font-size: 12px; font-weight: 600; color: var(--text-2); letter-spacing: .02em; padding: 4px 2px 2px; }
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow-sm); }
   .card.onboarding { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); animation: pulseBorder 2s infinite; }
   @keyframes pulseBorder { 0%,100% { box-shadow: 0 0 0 3px var(--primary-soft); } 50% { box-shadow: 0 0 0 6px var(--primary-soft); } }
+  
   .card-top { display: flex; gap: 12px; align-items: flex-start; }
-  .emoji-box { width: 46px; height: 46px; flex-shrink: 0; border-radius: 12px; background: var(--surface-2); display: grid; place-items: center; font-size: 24px; line-height: 1; }
+  .emoji-box { width: 52px; height: 52px; flex-shrink: 0; border-radius: 14px; display: grid; place-items: center; overflow: hidden; background: var(--surface-2); }
   .emoji-box.tech { background: var(--primary-soft); }
   .emoji-box.home { background: var(--yellow-soft); }
   .emoji-box.sport { background: var(--green-soft); }
   .emoji-box.hobby { background: var(--purple-soft); }
   .emoji-box.fashion { background: var(--red-soft); }
+  
+  .item-icon { width: 44px; height: 44px; object-fit: contain; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+  .inline-icon { width: 24px; height: 24px; object-fit: contain; vertical-align: middle; margin-right: 6px; display: inline-block; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+  .fallback-emoji { font-size: 28px; line-height: 1; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; text-align: center; }
+  .inline-fallback-emoji { font-size: 20px; line-height: 1; vertical-align: middle; margin-right: 6px; display: inline-block; }
+  
   .info { flex: 1; min-width: 0; }
   .name { font-weight: 700; font-size: 15px; color: var(--text); line-height: 1.25; }
   .cond { font-size: 12px; color: var(--text-3); margin-top: 3px; line-height: 1.35; }
@@ -130,6 +118,7 @@
   .row b.warn { color: var(--yellow); }
   .actions { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
   .actions button { flex: 1; min-width: 0; }
+  
   button {
     font-family: inherit; font-weight: 600; font-size: 14px;
     border-radius: 12px; border: none;
@@ -149,6 +138,7 @@
   .btn-full { width: 100%; padding: 14px; font-size: 15px; }
   .btn-sm { padding: 6px 12px; min-height: 34px; font-size: 12px; border-radius: 10px; }
   .empty { text-align: center; padding: 40px 20px; color: var(--text-3); font-size: 13px; line-height: 1.5; }
+  
   .bottom-nav { flex-shrink: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; background: var(--surface); border-top: 1px solid var(--border); padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); }
   .nav-btn { background: none; color: var(--text-3); padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-family: inherit; font-size: 10px; font-weight: 500; min-height: 52px; cursor: pointer; position: relative; transition: color .15s; border-radius: 12px; }
   .nav-btn .ico { font-size: 20px; line-height: 1; transition: transform .15s; }
@@ -157,6 +147,7 @@
   .nav-btn.active::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 24px; height: 3px; background: var(--primary); border-radius: 0 0 3px 3px; }
   .nav-btn .dot { position: absolute; top: 8px; right: 24%; width: 8px; height: 8px; border-radius: 50%; background: var(--red); display: none; box-shadow: 0 0 0 2px var(--surface); }
   .nav-btn .dot.on { display: block; }
+  
   .modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: flex-end; justify-content: center; z-index: 50; animation: fadeIn .2s ease; backdrop-filter: blur(2px); }
   .modal.hidden { display: none; }
   @keyframes fadeIn { from { opacity: 0; } }
@@ -165,6 +156,7 @@
   .drag-handle { width: 36px; height: 4px; background: var(--border-2); border-radius: 2px; margin: 0 auto 8px; flex-shrink: 0; }
   .sheet h2 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.01em; display: flex; align-items: center; gap: 8px; }
   .hint { font-size: 12px; color: var(--text-3); line-height: 1.45; padding: 10px 12px; background: var(--surface-2); border-radius: 10px; border-left: 3px solid var(--primary); }
+  
   .chat-header { display: flex; align-items: center; gap: 12px; padding: 4px 0 12px; border-bottom: 1px solid var(--border); }
   .chat-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; font-size: 24px; flex-shrink: 0; }
   .chat-name { font-weight: 700; font-size: 15px; }
@@ -183,7 +175,7 @@
   .quick-offers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .quick-offers button { padding: 10px 4px; font-size: 13px; background: var(--surface-2); font-weight: 700; }
   .quick-offers button:disabled { opacity: .3; }
-  /* ===== CUSTOM KEYBOARD ===== */
+  
   .custom-keyboard { display: flex; flex-direction: column; gap: 8px; }
   .keyboard-display { background: var(--surface-2); border-radius: 12px; padding: 10px 12px; text-align: center; }
   .keyboard-label { font-size: 11px; color: var(--text-3); font-weight: 500; margin-bottom: 4px; }
@@ -195,16 +187,18 @@
   .key-action { color: var(--text-2); font-size: 16px; }
   .keyboard-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2px; }
   .keyboard-submit { padding: 14px; font-size: 15px; }
-  /* ===== MISC ===== */
+  
   .toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--surface); color: var(--text); padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; z-index: 99; max-width: 85vw; text-align: center; box-shadow: var(--shadow-lg); border: 1px solid var(--border); animation: toastUp .3s cubic-bezier(.2,.8,.3,1); pointer-events: none; }
   .toast.success { background: var(--green); color: #fff; border-color: transparent; }
   .toast.error { background: var(--red); color: #fff; border-color: transparent; }
   .toast.reward { background: var(--purple); color: #fff; border-color: transparent; }
   @keyframes toastUp { from { opacity: 0; transform: translate(-50%, 20px); } }
+  
   .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .stat-mini { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
   .stat-mini .l { font-size: 11px; color: var(--text-3); font-weight: 500; }
   .stat-mini .v { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); }
+  
   .rank-card { background: linear-gradient(135deg, var(--purple), var(--primary)); color: #fff; border-radius: 16px; padding: 24px 16px; text-align: center; box-shadow: var(--shadow); }
   .rank-emoji { font-size: 44px; line-height: 1; margin-bottom: 4px; }
   .rank-name { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
@@ -212,12 +206,14 @@
   .level-bar { display: flex; gap: 4px; margin-top: 12px; }
   .level-seg { flex: 1; height: 4px; background: rgba(255,255,255,.25); border-radius: 2px; }
   .level-seg.on { background: rgba(255,255,255,.95); }
+  
   .ach-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .ach { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 3px; align-items: center; text-align: center; opacity: .35; }
   .ach.unlocked { opacity: 1; border-color: var(--yellow); background: var(--yellow-soft); }
   .ach-emoji { font-size: 22px; line-height: 1; }
   .ach-name { font-size: 11px; font-weight: 700; line-height: 1.2; }
   .ach-desc { font-size: 10px; color: var(--text-3); line-height: 1.25; }
+  
   .skill-branch { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
   .skill-head { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
   .skill-nodes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -226,6 +222,7 @@
   .skill-node.next { border-style: dashed; border-color: var(--primary); color: var(--primary); cursor: pointer; }
   .skill-node .lvl { font-size: 15px; }
   .skill-node .lbl { font-size: 9px; }
+  
   .mg-title { text-align: center; font-size: 16px; font-weight: 700; }
   .mg-round { text-align: center; font-size: 12px; color: var(--text-3); margin-bottom: 8px; }
   .mg-dots { display: flex; gap: 8px; justify-content: center; margin-bottom: 14px; }
@@ -249,25 +246,28 @@
   .mg-summary .big { font-size: 56px; line-height: 1; margin-bottom: 8px; }
   .mg-summary .txt { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
   .mg-summary .sub { font-size: 12px; color: var(--text-3); margin-bottom: 14px; }
+  
   .theme-switcher { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; background: var(--surface-2); border-radius: 12px; }
   .theme-btn { padding: 10px; border-radius: 10px; background: transparent; color: var(--text-2); font-size: 13px; font-weight: 600; min-height: 40px; }
   .theme-btn.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+  
   .bonus-toast { position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%); background: var(--surface); border-radius: 20px; padding: 24px 32px; text-align: center; font-size: 15px; font-weight: 600; z-index: 200; box-shadow: var(--shadow-lg), 0 0 0 1px var(--border); animation: bonusPop .5s cubic-bezier(.2,.8,.3,1); min-width: 220px; }
   .bonus-toast .amt { font-size: 28px; color: var(--green); margin: 8px 0; font-weight: 800; }
   @keyframes bonusPop { from { opacity: 0; transform: translate(-50%, -50%) scale(.7); } 60% { transform: translate(-50%, -50%) scale(1.05); } }
-  .install-hint { background: var(--primary-soft); color: var(--primary); border-radius: 12px; padding: 12px 14px; font-size: 12px; line-height: 1.45; font-weight: 500; margin-bottom: 4px; }
+  
   .tutorial-card { background: var(--surface); border: 1px solid var(--primary); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
   .tutorial-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
   .tutorial-steps { font-size: 13px; line-height: 1.6; color: var(--text-2); }
   .tutorial-steps span { color: var(--primary); font-weight: 600; margin-right: 4px; }
   .season-indicator { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; font-size: 12px; color: var(--text-2); }
   .season-indicator b { color: var(--text); }
+  
   .splash { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .3s; }
   .splash.hidden { display: none; }
   .splash-content { text-align: center; max-width: 340px; width: 100%; }
   .splash-logo { font-size: 88px; line-height: 1; margin-bottom: 16px; animation: bounceLogo 2s ease infinite; }
   @keyframes bounceLogo { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
-  .splash h1 { font-size: 32px; font-weight: 800; margin: 0 0 8px; letter-spacing: -.02em; background: linear-gradient(135deg, var(--primary), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .splash h1 { font-size: 26px; font-weight: 800; margin: 0 0 8px; letter-spacing: -.02em; background: linear-gradient(135deg, var(--primary), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.2; }
   .splash-tagline { font-size: 14px; color: var(--text-2); margin-bottom: 32px; line-height: 1.4; }
   .splash-actions { display: flex; flex-direction: column; gap: 10px; }
   .splash-btn-primary { background: var(--primary); color: #fff; padding: 16px; font-size: 16px; font-weight: 700; border-radius: 14px; border: none; cursor: pointer; }
@@ -284,7 +284,7 @@
 <div id="splash" class="splash">
   <div class="splash-content">
     <div class="splash-logo">💰</div>
-    <h1>ПЕРЕКУП</h1>
+    <h1>RESELLER<br>SIMULATOR</h1>
     <div class="splash-tagline">Покупай дешевле — продавай дороже.<br>Стань королём барахолки.</div>
     <div class="splash-actions">
       <button class="splash-btn-primary" onclick="startGame()">🎮 Играть</button>
@@ -296,7 +296,7 @@
 
 <header class="app-header">
   <div class="header-top">
-    <div class="app-title"><span class="dot-live"></span>Перекуп</div>
+    <div class="app-title"><span class="dot-live"></span>Reseller Simulator</div>
     <div class="header-stats">
       <div class="chip day">📅 <span id="dayChip">1</span></div>
       <div class="chip rep">⭐ <span id="repChip">50</span></div>
@@ -331,113 +331,67 @@
 </div>
 
 <script>
-/* =========================================================
-   ANALYTICS
-   ========================================================= */
-const ANALYTICS_ENABLED = false;
-const YM_COUNTER_ID = 0;
-function track(event, params) {
-  if (!ANALYTICS_ENABLED) return;
-  try {
-    if (YM_COUNTER_ID && typeof window.ym === 'function') {
-      window.ym(YM_COUNTER_ID, 'reachGoal', event, params || {});
-    }
-  } catch(e) {}
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
 }
 
-/* =========================================================
-   TELEGRAM MINI APP
-   ========================================================= */
-const TG = (() => {
-  try {
-    const tg = window.Telegram?.WebApp;
-    if (!tg) return null;
-    tg.ready(); tg.expand();
-    if (tg.setHeaderColor) try { tg.setHeaderColor('#0a0e14'); } catch(e) {}
-    return tg;
-  } catch(e) { return null; }
-})();
+// Icons8 Fluency CDN
+const CDN_BASE = 'https://img.icons8.com/fluency/96/';
 
-function tgHaptic(type) {
-  try {
-    if (TG?.HapticFeedback) {
-      if (type === 'success') TG.HapticFeedback.notificationOccurred('success');
-      else if (type === 'error') TG.HapticFeedback.notificationOccurred('error');
-      else if (type === 'select') TG.HapticFeedback.selectionChanged();
-      else TG.HapticFeedback.impactOccurred('light');
-    }
-  } catch(e) {}
-}
-
-/* =========================================================
-   SAFE STORAGE
-   ========================================================= */
-const SafeStorage = {
-  available: false,
-  test() {
-    try {
-      localStorage.setItem('__test__', '1');
-      localStorage.removeItem('__test__');
-      this.available = true;
-    } catch(e) { this.available = false; }
-  },
-  get(k) { if (!this.available) return null; try { return localStorage.getItem(k); } catch(e) { return null; } },
-  set(k, v) { if (!this.available) return; try { localStorage.setItem(k, v); } catch(e) {} },
-  remove(k) { if (!this.available) return; try { localStorage.removeItem(k); } catch(e) {} }
-};
-SafeStorage.test();
-
-let saveTimer = null;
-function saveDebounced() {
-  if (saveTimer) return;
-  saveTimer = setTimeout(() => { saveTimer = null; save(); }, 500);
-}
-
-/* =========================================================
-   DATA
-   ========================================================= */
 const ITEMS = [
-  { name: 'iPhone 15', emoji: '📱', base: 75000, cat: 'tech' },
-  { name: 'iPhone 13', emoji: '📱', base: 42000, cat: 'tech' },
-  { name: 'Samsung S23', emoji: '📱', base: 45000, cat: 'tech' },
-  { name: 'MacBook Air', emoji: '💻', base: 85000, cat: 'tech' },
-  { name: 'Ноутбук Lenovo', emoji: '💻', base: 38000, cat: 'tech' },
-  { name: 'PlayStation 5', emoji: '🎮', base: 47000, cat: 'tech' },
-  { name: 'Nintendo Switch', emoji: '🎮', base: 25000, cat: 'tech' },
-  { name: 'AirPods Pro', emoji: '🎧', base: 15000, cat: 'tech' },
-  { name: 'Sony WH-1000XM5', emoji: '🎧', base: 28000, cat: 'tech' },
-  { name: 'iPad Air', emoji: '📱', base: 48000, cat: 'tech' },
-  { name: 'Дрон DJI', emoji: '🚁', base: 55000, cat: 'tech' },
-  { name: 'Проектор', emoji: '📽️', base: 19000, cat: 'tech' },
-  { name: 'Фотоаппарат Sony', emoji: '📷', base: 65000, cat: 'tech' },
-  { name: 'Смарт-часы Apple', emoji: '⌚', base: 25000, cat: 'tech' },
-  { name: 'Кофемашина', emoji: '☕', base: 32000, cat: 'home' },
-  { name: 'Робот-пылесос', emoji: '🤖', base: 24000, cat: 'home' },
-  { name: 'Пылесос Dyson', emoji: '🌀', base: 38000, cat: 'home' },
-  { name: 'Микроволновка', emoji: '🍲', base: 8000, cat: 'home' },
-  { name: 'Швейная машинка', emoji: '🧵', base: 15000, cat: 'home' },
-  { name: 'Мультиварка', emoji: '🍳', base: 7000, cat: 'home' },
-  { name: 'Велосипед горный', emoji: '🚲', base: 32000, cat: 'sport' },
-  { name: 'Сноуборд', emoji: '🏂', base: 28000, cat: 'sport' },
-  { name: 'Палатка 4-местная', emoji: '⛺', base: 18000, cat: 'sport' },
-  { name: 'Беговая дорожка', emoji: '🏃', base: 42000, cat: 'sport' },
-  { name: 'Гантели 20кг', emoji: '🏋️', base: 8000, cat: 'sport' },
-  { name: 'Гитара Fender', emoji: '🎸', base: 35000, cat: 'hobby' },
-  { name: 'Синтезатор', emoji: '🎹', base: 28000, cat: 'hobby' },
-  { name: 'Телескоп', emoji: '🔭', base: 22000, cat: 'hobby' },
-  { name: 'Винил Led Zeppelin', emoji: '💿', base: 12000, cat: 'hobby' },
-  { name: 'Сумка Louis Vuitton', emoji: '👜', base: 95000, cat: 'fashion' },
-  { name: 'Кроссовки Nike', emoji: '👟', base: 18000, cat: 'fashion' },
-  { name: 'Часы Rolex', emoji: '⌚', base: 250000, cat: 'fashion' },
-  { name: 'Кожаная куртка', emoji: '🧥', base: 25000, cat: 'fashion' },
-  { name: 'Очки Ray-Ban', emoji: '🕶️', base: 12000, cat: 'fashion' },
+  { name: 'iPhone 15', emoji: '📱', slug: 'smartphone', base: 75000, cat: 'tech' },
+  { name: 'iPhone 13', emoji: '📱', slug: 'smartphone', base: 42000, cat: 'tech' },
+  { name: 'Samsung S23', emoji: '📱', slug: 'smartphone', base: 45000, cat: 'tech' },
+  { name: 'MacBook Air', emoji: '💻', slug: 'laptop', base: 85000, cat: 'tech' },
+  { name: 'Ноутбук Lenovo', emoji: '💻', slug: 'laptop', base: 38000, cat: 'tech' },
+  { name: 'PlayStation 5', emoji: '🎮', slug: 'controller', base: 47000, cat: 'tech' },
+  { name: 'Nintendo Switch', emoji: '🕹️', slug: 'joystick', base: 25000, cat: 'tech' },
+  { name: 'AirPods Pro', emoji: '🎧', slug: 'headphones', base: 15000, cat: 'tech' },
+  { name: 'Sony WH-1000XM5', emoji: '🎧', slug: 'headphones', base: 28000, cat: 'tech' },
+  { name: 'iPad Air', emoji: '📱', slug: 'tablet', base: 48000, cat: 'tech' },
+  { name: 'Дрон DJI', emoji: '🚁', slug: 'drone', base: 55000, cat: 'tech' },
+  { name: 'Проектор', emoji: '📽️', slug: 'projector', base: 19000, cat: 'tech' },
+  { name: 'Фотоаппарат Sony', emoji: '📷', slug: 'camera', base: 65000, cat: 'tech' },
+  { name: 'Смарт-часы Apple', emoji: '⌚', slug: 'smart-watch', base: 25000, cat: 'tech' },
+  { name: 'Кофемашина', emoji: '☕', slug: 'coffee-maker', base: 32000, cat: 'home' },
+  { name: 'Робот-пылесос', emoji: '🤖', slug: 'robot-vacuum-cleaner', base: 24000, cat: 'home' },
+  { name: 'Пылесос Dyson', emoji: '🌀', slug: 'vacuum-cleaner', base: 38000, cat: 'home' },
+  { name: 'Микроволновка', emoji: '📻', slug: 'microwave', base: 8000, cat: 'home' },
+  { name: 'Швейная машинка', emoji: '🪡', slug: 'sewing-machine', base: 15000, cat: 'home' },
+  { name: 'Мультиварка', emoji: '🍲', slug: 'multicooker', base: 7000, cat: 'home' },
+  { name: 'Велосипед горный', emoji: '🚲', slug: 'bicycle', base: 32000, cat: 'sport' },
+  { name: 'Сноуборд', emoji: '🏂', slug: 'snowboard', base: 28000, cat: 'sport' },
+  { name: 'Палатка 4-местная', emoji: '⛺', slug: 'tent', base: 18000, cat: 'sport' },
+  { name: 'Беговая дорожка', emoji: '🏃', slug: 'treadmill', base: 42000, cat: 'sport' },
+  { name: 'Гантели 20кг', emoji: '🏋️', slug: 'dumbbell', base: 8000, cat: 'sport' },
+  { name: 'Гитара Fender', emoji: '🎸', slug: 'guitar', base: 35000, cat: 'hobby' },
+  { name: 'Синтезатор', emoji: '🎹', slug: 'synthesizer', base: 28000, cat: 'hobby' },
+  { name: 'Телескоп', emoji: '🔭', slug: 'telescope', base: 22000, cat: 'hobby' },
+  { name: 'Винил Led Zeppelin', emoji: '💿', slug: 'vinyl', base: 12000, cat: 'hobby' },
+  { name: 'Сумка Louis Vuitton', emoji: '👜', slug: 'handbag', base: 95000, cat: 'fashion' },
+  { name: 'Кроссовки Nike', emoji: '👟', slug: 'running-shoe', base: 18000, cat: 'fashion' },
+  { name: 'Часы Rolex', emoji: '⌚', slug: 'watch', base: 250000, cat: 'fashion' },
+  { name: 'Кожаная куртка', emoji: '🧥', slug: 'jacket', base: 25000, cat: 'fashion' },
+  { name: 'Очки Ray-Ban', emoji: '🕶️', slug: 'sunglasses', base: 12000, cat: 'fashion' },
 ];
+
+// Функция вывода иконки с fallback на эмодзи
+function getIconHtml(item, isInline = false) {
+  const url = `${CDN_BASE}${item.slug}.png`;
+  const cls = isInline ? 'inline-icon' : 'item-icon';
+  const fallbackCls = isInline ? 'inline-fallback-emoji' : 'fallback-emoji';
+  return `<img src="${url}" class="${cls}" onerror="this.outerHTML='<span class=\\'${fallbackCls}\\'>${item.emoji}</span>'" alt="">`;
+}
+
 const SEASONS = [
   { name: 'Зима', emoji: '❄️', mods: { tech: 1.20, sport: 0.70, hobby: 1.05, home: 1.0, fashion: 1.10 } },
   { name: 'Весна', emoji: '🌸', mods: { tech: 1.0, sport: 1.30, hobby: 1.10, home: 1.0, fashion: 1.15 } },
   { name: 'Лето', emoji: '☀️', mods: { tech: 0.90, sport: 1.40, hobby: 1.15, home: 1.0, fashion: 0.95 } },
   { name: 'Осень', emoji: '🍂', mods: { tech: 1.10, sport: 0.85, hobby: 1.0, home: 1.10, fashion: 1.05 } },
 ];
+
 const STORIES = [
   { id: 'granny', tag: '👵', tagText: 'бабушка', priceMult: 0.80, trueMult: 1.0, text: 'Срочно нужны деньги' },
   { id: 'urgent', tag: '⏰', tagText: 'срочно', priceMult: 0.78, trueMult: 1.0, text: 'Срочная продажа' },
@@ -447,6 +401,7 @@ const STORIES = [
   { id: 'newbox', tag: '✨', tagText: 'новое', priceMult: 1.15, trueMult: 1.20, text: 'Заводская упаковка' },
   { id: 'warranty', tag: '📄', tagText: 'гарантия', priceMult: 1.10, trueMult: 1.10, text: 'С гарантией' },
 ];
+
 const SELLER_TYPES = [
   { id: 'friendly', emoji: '😊', name: 'Дружелюбный', maxDiscount: 0.18, patience: 3,
     greeting: (i) => `Привет! ${i.name}, ${Math.round(i.condition*100)}%. Отдам за ${fmt(i.askPrice)}`,
@@ -465,6 +420,7 @@ const SELLER_TYPES = [
     counter: (p) => `Только ${fmt(p)}, край`,
     accept: 'Ладно, беру', angry: 'Ха, шутник' },
 ];
+
 const BUYERS = [
   { id: 'regular', emoji: '🤝', name: 'Постоянный', info: 'Платит хорошо', priceMult: 1.10, maxRaises: 1, raiseFactor: 1.18,
     greeting: (i,p) => `Привет, ${i.name} ещё продаёшь? Готов взять за ${fmt(p)}`,
@@ -482,6 +438,7 @@ const BUYERS = [
     greeting: (i,p) => `Беру ${i.name}. Держи ${fmt(p)}, быстро`,
     counter: (p) => `Ладно, ${fmt(p)}`, accept: 'Всё как договаривались', angry: 'Не хочешь — как хочешь' },
 ];
+
 const ACHIEVEMENTS = [
   { id: 'first_sale', emoji: '🎉', name: 'Первая сделка', desc: 'Продать первый товар', points: 1 },
   { id: 'ten_sales', emoji: '📦', name: '10 сделок', desc: 'Продать 10 товаров', points: 1 },
@@ -499,6 +456,7 @@ const ACHIEVEMENTS = [
   { id: 'biz2', emoji: '🏪', name: 'Магазин', desc: '100 000₽ бизнеса', points: 1 },
   { id: 'biz4', emoji: '🏛️', name: 'Империя', desc: '2 000 000₽ бизнеса', points: 2 },
 ];
+
 const BUSINESS_LEVELS = [
   { name: 'Ларёк', emoji: '🥾', min: 0 },
   { name: 'Палатка', emoji: '🏕️', min: 25000 },
@@ -506,6 +464,7 @@ const BUSINESS_LEVELS = [
   { name: 'Сеть', emoji: '🏬', min: 500000 },
   { name: 'Империя', emoji: '🏛️', min: 2000000 },
 ];
+
 const RANKS = [
   { min: 0, emoji: '🐣', name: 'Новичок', desc: 'Только начинаешь' },
   { min: 15, emoji: '🎒', name: 'Стажёр', desc: 'Что-то уже умеешь' },
@@ -514,17 +473,20 @@ const RANKS = [
   { min: 70, emoji: '💎', name: 'Магнат', desc: 'Серьёзный бизнес' },
   { min: 90, emoji: '👑', name: 'Король', desc: 'Легенда рынка' },
 ];
+
 const TRANSPORTS = [
   { name: 'Пешком', emoji: '🥾', cost: 0, desc: 'Базовый рынок' },
   { name: 'Ржавая шестёрка', emoji: '🚗', cost: 5000, desc: '+ редкие лоты (8%)', reqLevel: 1 },
   { name: 'Фургон', emoji: '🚐', cost: 50000, desc: '+ премиум-лоты (3%)', reqLevel: 2 },
   { name: 'Газель', emoji: '🚚', cost: 200000, desc: 'Доступ к палетам', reqLevel: 3 },
 ];
+
 const SKILLS = {
   trade: { name: 'Торговля', emoji: '💬', levels: ['+3% к цене', '+6% к цене', '+10% к цене'] },
   inspect: { name: 'Осмотр', emoji: '🔍', levels: ['−25% осмотр', 'точнее оценка', 'виден дефект'] },
   logistics: { name: 'Логистика', emoji: '📦', levels: ['+1 слот', '+2 слота', 'склад 5 мест'] },
 };
+
 const UPGRADES = {
   inventory: { name: 'Инвентарь', emoji: '🎒', base: '3 слота', levels: [
     { cost: 5000, desc: '5 слотов' }, { cost: 20000, desc: '8 слотов' }, { cost: 60000, desc: '15 слотов' }
@@ -537,17 +499,15 @@ const UPGRADES = {
   negotiation: { name: 'Переговорщик', emoji: '🗣️', desc: '+1 попытка торга', cost: 40000 },
   accountant: { name: 'Бухгалтер', emoji: '📉', desc: 'Аренда и проценты −30%', cost: 25000 },
 };
+
 const INV_SIZES = [3, 5, 8, 15];
 const MARKET_SIZES = [6, 8, 10];
 const TARGET_MONEY = 100000;
-const SAVE_KEY = 'perekup_save_v8';
+const SAVE_KEY = 'perekup_v10';
 const INSPECT_PCT = 0.06;
 const INSPECT_MIN = 300;
 const QUICK_STEPS = [500, 1000, 2000];
 
-/* =========================================================
-   STATE
-   ========================================================= */
 const defaultState = () => ({
   money: 15000, maxMoney: 15000, day: 1, rep: 50,
   market: [], inv: [], storage: [], orders: [],
@@ -556,7 +516,7 @@ const defaultState = () => ({
   skills: { trade: 0, inspect: 0, logistics: 0 },
   skillPoints: 0, dailyStreak: 0, lastBonusDate: null,
   theme: 'dark',
-  soundOn: true, hapticOn: true, showInstall: true, showTutorial: true,
+  soundOn: true, hapticOn: true, showTutorial: true,
   wasRich: false, lastBizLevel: 0,
   onboardingStep: 0, firstPlayed: false,
   up: { inventory: 0, market: 0, analytics: false, vip: false, negotiation: false, accountant: false },
@@ -571,21 +531,13 @@ let idc = 0;
 let activeTab = 'market';
 let gameStarted = false;
 
-/* =========================================================
-   UTILS
-   ========================================================= */
 const el = id => document.getElementById(id);
 const rnd = (a, b) => a + Math.random() * (b - a);
 const ri = (a, b) => Math.floor(rnd(a, b + 1));
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const fmt = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
 const round100 = n => Math.max(100, Math.round(n / 100) * 100);
-
-const bizLevel = () => {
-  let lvl = 0;
-  for (let i = 0; i < BUSINESS_LEVELS.length; i++) if (S.maxMoney >= BUSINESS_LEVELS[i].min) lvl = i;
-  return lvl;
-};
+const bizLevel = () => { let lvl = 0; for (let i = 0; i < BUSINESS_LEVELS.length; i++) if (S.maxMoney >= BUSINESS_LEVELS[i].min) lvl = i; return lvl; };
 const invLimit = () => INV_SIZES[S.up.inventory] + (S.skills.logistics >= 1 ? 1 : 0) + (S.skills.logistics >= 2 ? 1 : 0);
 const storageLimit = () => (S.skills.logistics >= 3 ? 5 : 0);
 const marketSize = () => MARKET_SIZES[S.up.market];
@@ -603,24 +555,40 @@ const rentCost = () => {
   if (S.event && S.event.effect === 'taxRaise') base += S.event.amount;
   return base;
 };
-const creditInterest = () => {
-  let base = Math.round(S.credit * 0.10);
-  if (S.up.accountant) base = Math.round(base * 0.7);
-  return base;
-};
+const creditInterest = () => { let b = Math.round(S.credit * 0.10); if (S.up.accountant) b = Math.round(b * 0.7); return b; };
 const creditLimit = () => Math.round(S.rep * 500);
 
-function toast(msg, type) {
-  const t = document.createElement('div');
-  t.className = 'toast' + (type ? ' ' + type : '');
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2000);
+const SafeStorage = {
+  available: false,
+  test() { try { localStorage.setItem('__t__','1'); localStorage.removeItem('__t__'); this.available = true; } catch(e) { this.available = false; } },
+  get(k) { if (!this.available) return null; try { return localStorage.getItem(k); } catch(e) { return null; } },
+  set(k, v) { if (!this.available) return; try { localStorage.setItem(k, v); } catch(e) {} },
+  remove(k) { if (!this.available) return; try { localStorage.removeItem(k); } catch(e) {} }
+};
+SafeStorage.test();
+let saveTimer = null;
+function saveDebounced() {
+  if (saveTimer) return;
+  saveTimer = setTimeout(() => { saveTimer = null; save(); }, 500);
 }
-function haptic(ms) {
-  if (!S.hapticOn) return;
-  tgHaptic('light');
-  if (navigator.vibrate) try { navigator.vibrate(ms || 15); } catch(e) {}
+function save() { if (!SafeStorage.available) return; try { SafeStorage.set(SAVE_KEY, JSON.stringify({ ...S, _v: 10 })); } catch(e) {} }
+function load() {
+  const raw = SafeStorage.get(SAVE_KEY);
+  if (!raw) return false;
+  try {
+    const d = JSON.parse(raw);
+    if (d._v !== 10) return false;
+    delete d._v;
+    S = { ...defaultState(), ...d };
+    S.up = { ...defaultState().up, ...(d.up || {}) };
+    S.stats = { ...defaultState().stats, ...(d.stats || {}) };
+    S.skills = { ...defaultState().skills, ...(d.skills || {}) };
+    S.achievements = d.achievements || {};
+    const ids = [...S.market, ...S.inv, ...S.storage].map(x => x.id || 0);
+    idc = ids.length ? Math.max(...ids) : 0;
+    chat = null; repairGame = null;
+    return true;
+  } catch(e) { return false; }
 }
 
 let audioCtx = null;
@@ -629,8 +597,7 @@ function playSound(type) {
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
     o.connect(g); g.connect(audioCtx.destination);
     let freq = 440, dur = 0.08;
     if (type === 'click') { freq = 620; dur = 0.05; }
@@ -648,7 +615,14 @@ function playSound(type) {
     o.start(); o.stop(audioCtx.currentTime + dur);
   } catch(e) {}
 }
-
+function haptic(ms) { if (!S.hapticOn) return; try { if (navigator.vibrate) navigator.vibrate(ms || 15); } catch(e) {} }
+function toast(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'toast' + (type ? ' ' + type : '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
 function setTheme(theme) {
   S.theme = theme;
   document.documentElement.setAttribute('data-theme', theme);
@@ -657,59 +631,13 @@ function setTheme(theme) {
   saveDebounced();
 }
 
-/* =========================================================
-   SAVE
-   ========================================================= */
-function save() {
-  if (!SafeStorage.available) return;
-  try { SafeStorage.set(SAVE_KEY, JSON.stringify({ ...S, _v: 8 })); } catch(e) {}
-}
-function load() {
-  const raw = SafeStorage.get(SAVE_KEY);
-  if (!raw) return false;
-  try {
-    const d = JSON.parse(raw);
-    if (d._v !== 8) return false;
-    delete d._v;
-    S = { ...defaultState(), ...d };
-    S.up = { ...defaultState().up, ...(d.up || {}) };
-    S.stats = { ...defaultState().stats, ...(d.stats || {}) };
-    S.skills = { ...defaultState().skills, ...(d.skills || {}) };
-    S.achievements = d.achievements || {};
-    const ids = [...S.market, ...S.inv, ...S.storage].map(x => x.id || 0);
-    idc = ids.length ? Math.max(...ids) : 0;
-    chat = null; repairGame = null;
-    return true;
-  } catch(e) { return false; }
-}
-function resetGame() {
-  showConfirm('Сбросить прогресс?', 'Все достижения и деньги будут удалены. Начать заново?', () => {
-    const theme = S.theme;
-    SafeStorage.remove(SAVE_KEY);
-    S = defaultState();
-    S.theme = theme;
-    chat = null; repairGame = null; idc = 0;
-    newMarket(); makeOrder();
-    render();
-    toast('Игра сброшена', 'success');
-    track('reset_game');
-  }, true);
-}
-
-/* =========================================================
-   MODALS
-   ========================================================= */
-function showSheet(html) {
-  el('sheet').innerHTML = html;
-  el('modal').classList.remove('hidden');
-}
+function showSheet(html) { el('sheet').innerHTML = html; el('modal').classList.remove('hidden'); }
 function closeSheet(silent) {
   if (repairGame) { cancelAnimationFrame(repairGame.rafId); repairGame = null; }
   chat = null;
   el('modal').classList.add('hidden');
   if (!silent) render();
 }
-
 let confirmCallback = null;
 function showConfirm(title, text, onConfirm, danger) {
   confirmCallback = onConfirm;
@@ -723,7 +651,6 @@ function showConfirm(title, text, onConfirm, danger) {
 }
 window.confirmYes = () => { const cb = confirmCallback; confirmCallback = null; closeSheet(true); if (cb) cb(); };
 window.confirmNo = () => { confirmCallback = null; closeSheet(true); };
-
 function showAlert(title, text, emoji) {
   showSheet(`
     <div class="drag-handle"></div>
@@ -732,23 +659,20 @@ function showAlert(title, text, emoji) {
     <button class="btn-primary btn-full" onclick="closeSheet()">Ок</button>
   `);
 }
-
 function showPrivacy() {
   showSheet(`
     <div class="drag-handle"></div>
     <h2>🔒 Политика конфиденциальности</h2>
     <div class="privacy-content">
-      <p>Игра «Перекуп» уважает вашу приватность.</p>
+      <p>Игра «Reseller Simulator» уважает вашу приватность.</p>
       <h3>Что мы собираем</h3>
       <p><b>Ничего личного.</b> Игра не требует регистрации, email, номера телефона.</p>
       <h3>Где хранится прогресс</h3>
-      <p>Прогресс хранится <b>локально на вашем устройстве</b> через localStorage браузера. Мы не имеем доступа к нему.</p>
-      <h3>Аналитика</h3>
-      <p>Если включена, используется <b>Яндекс.Метрика</b> для анонимной статистики. Отключить можно в настройках браузера.</p>
-      <h3>Telegram</h3>
-      <p>При запуске внутри Telegram игра использует официальный WebApp API. Данные аккаунта не сохраняются.</p>
+      <p>Прогресс хранится <b>локально на вашем устройстве</b> через localStorage. Мы не имеем доступа к нему.</p>
+      <h3>Иконки</h3>
+      <p>В игре используются открытые 3D-иконки (Icons8 Fluency).</p>
       <h3>Ваши права</h3>
-      <p>Вы можете сбросить все данные в настройках игры или очистить данные сайта в браузере.</p>
+      <p>Вы можете сбросить все данные в настройках игры или очистить данные приложения в настройках Android.</p>
       <p style="margin-top:16px;color:var(--text-3);font-size:11px">Обновлено: ${new Date().toLocaleDateString('ru-RU')}</p>
     </div>
     <button class="btn-primary btn-full" onclick="closeSheet()">Понятно</button>
@@ -756,9 +680,6 @@ function showPrivacy() {
 }
 window.showPrivacy = showPrivacy;
 
-/* =========================================================
-   GENERATION
-   ========================================================= */
 function makeLot(forceTier) {
   const t = pick(ITEMS);
   const condition = rnd(0.55, 1.0);
@@ -782,11 +703,7 @@ function makeLot(forceTier) {
   }
   let estimate = round100(marketValue * rnd(0.8, 1.2));
   if (S.skills.inspect >= 2) estimate = round100(marketValue * rnd(0.92, 1.08));
-  return {
-    id: ++idc, name: t.name, emoji: t.emoji, cat: t.cat,
-    condition, marketValue, trueValue, defect,
-    askPrice, estimate, inspected: false, tier, story,
-  };
+  return { id: ++idc, name: t.name, emoji: t.emoji, slug: t.slug, cat: t.cat, condition, marketValue, trueValue, defect, askPrice, estimate, inspected: false, tier, story };
 }
 function makeBlack() {
   const it = makeLot();
@@ -800,26 +717,15 @@ function makeOrder() {
   const t = pick(ITEMS);
   const bonus = rnd(0.15, 0.30);
   const baseValue = round100(t.base * rnd(0.9, 1.1));
-  S.orders.push({
-    id: ++idc, name: t.name, emoji: t.emoji,
-    reward: round100(baseValue * (1 + bonus)),
-    deadline: S.day + ri(3, 5),
-    bonus: Math.round(bonus * 100),
-    done: false, failed: false,
-  });
+  S.orders.push({ id: ++idc, name: t.name, emoji: t.emoji, slug: t.slug, reward: round100(baseValue * (1 + bonus)), deadline: S.day + ri(3, 5), bonus: Math.round(bonus * 100), done: false, failed: false });
 }
 function newMarket() {
   S.dailyDemand = Math.random() < 0.4 ? pick(ITEMS) : null;
   S.market = Array.from({ length: marketSize() }, () => makeLot());
   if (S.day % 7 === 0) S.market.push(makeBlack());
 }
-function makePallet() {
-  S.pallet = { id: ++idc, size: ri(3, 5), price: round100(rnd(12000, 40000)), day: S.day };
-}
+function makePallet() { S.pallet = { id: ++idc, size: ri(3, 5), price: round100(rnd(12000, 40000)), day: S.day }; }
 
-/* =========================================================
-   ACHIEVEMENTS
-   ========================================================= */
 function unlockAch(id) {
   if (S.achievements[id]) return;
   S.achievements[id] = true;
@@ -828,7 +734,6 @@ function unlockAch(id) {
     S.skillPoints += a.points;
     toast(`🏅 ${a.name} · +${a.points} SP`, 'success');
     playSound('ach'); haptic(30);
-    track('achievement', { id });
   }
 }
 function checkAch() {
@@ -852,17 +757,10 @@ function updateBizLevel() {
     S.lastBizLevel = newLvl;
     S.skillPoints += 1;
     const bl = BUSINESS_LEVELS[newLvl];
-    setTimeout(() => {
-      toast(`${bl.emoji} ${bl.name}! +1 SP`, 'reward');
-      haptic(50);
-      track('level_up', { level: newLvl });
-    }, 400);
+    setTimeout(() => { toast(`${bl.emoji} ${bl.name}! +1 SP`, 'reward'); haptic(50); }, 400);
   }
 }
 
-/* =========================================================
-   RENDER
-   ========================================================= */
 function renderStats() {
   S.maxMoney = Math.max(S.maxMoney, S.money);
   const moneyEl = el('moneyChipVal');
@@ -880,20 +778,14 @@ function renderStats() {
   el('dotBiz').classList.toggle('on', S.skillPoints > 0 || (S.pallet && S.transport >= 3));
 }
 function renderBanners() {
-  const c = el('banners');
-  const parts = [];
+  const c = el('banners'), parts = [];
   if (S.credit > 0) parts.push(`<div class="banner debt">💳 Долг: ${fmt(S.credit)} · ${fmt(creditInterest())}/день</div>`);
   if (S.event) parts.push(`<div class="banner event">${S.event.emoji} ${S.event.text}</div>`);
   c.innerHTML = parts.join('');
 }
+
 function renderMarket() {
   let html = '';
-  if (S.showInstall) {
-    html += `<div class="install-hint">
-      <b>📱 Установите как приложение:</b> меню браузера → «Добавить на главный экран».
-      <button class="btn-sm" style="margin-top:8px;background:var(--surface);color:var(--text)" onclick="hideInstall()">Понятно</button>
-    </div>`;
-  }
   if (S.showTutorial && S.onboardingStep === 0) {
     html += `<div class="tutorial-card">
       <div class="tutorial-title">💡 Как играть</div>
@@ -906,18 +798,14 @@ function renderMarket() {
       <button class="btn-primary btn-sm" onclick="hideTutorial()">Начать</button>
     </div>`;
   }
-  if (S.onboardingStep === 1 && S.market.length > 0) {
-    html += `<div class="onboarding-tip"><span class="arrow">👇</span> Осмотри первый лот, чтобы узнать его реальную цену</div>`;
-  } else if (S.onboardingStep === 2) {
-    html += `<div class="onboarding-tip"><span class="arrow">💬</span> Нажми «Написать» на подсвеченном лоте и поторгуйся</div>`;
-  }
+  if (S.onboardingStep === 1 && S.market.length > 0) html += `<div class="onboarding-tip"><span class="arrow">👇</span> Осмотри первый лот, чтобы узнать его реальную цену</div>`;
+  else if (S.onboardingStep === 2) html += `<div class="onboarding-tip"><span class="arrow">💬</span> Нажми «Написать» на подсвеченном лоте и поторгуйся</div>`;
+  
   const s = currentSeason();
-  html += `<div class="season-indicator">
-    ${s.emoji} <b>${s.name}</b> · тех ×${s.mods.tech.toFixed(2)} · спорт ×${s.mods.sport.toFixed(2)}
-  </div>`;
-  if (!S.market.length) {
-    html += '<div class="empty">Рынок пуст. Нажмите «Следующий день».</div>';
-  } else {
+  html += `<div class="season-indicator">${s.emoji} <b>${s.name}</b> · тех ×${s.mods.tech.toFixed(2)} · спорт ×${s.mods.sport.toFixed(2)}</div>`;
+  
+  if (!S.market.length) html += '<div class="empty">Рынок пуст. Нажмите «Следующий день».</div>';
+  else {
     const invFull = S.inv.length >= invLimit();
     html += S.market.map((it, idx) => {
       const known = it.inspected || S.up.analytics || S.skills.inspect >= 3;
@@ -926,8 +814,7 @@ function renderMarket() {
       const cost = inspectCost(it.askPrice);
       const canInspect = !known && S.money >= cost;
       const canBuy = S.money >= it.askPrice && !invFull;
-      const isOnboarding = (S.onboardingStep === 1 && idx === 0 && !it.inspected) ||
-                           (S.onboardingStep === 2 && idx === 0 && it.inspected);
+      const isOnboarding = (S.onboardingStep === 1 && idx === 0 && !it.inspected) || (S.onboardingStep === 2 && idx === 0 && it.inspected);
       const tags = [];
       if (known && it.defect) tags.push('<span class="tag tag-defect">⚠️ дефект</span>');
       if (S.dailyDemand && it.name === S.dailyDemand.name) tags.push('<span class="tag tag-demand">🔥 спрос</span>');
@@ -937,50 +824,39 @@ function renderMarket() {
       if (it.story) tags.push(`<span class="tag tag-story">${it.story.tag} ${it.story.tagText}</span>`);
       const seasonMod = seasonMultFor(it);
       if (Math.abs(seasonMod - 1) > 0.1) tags.push(`<span class="tag tag-season">${seasonMod > 1 ? '📈' : '📉'}${seasonMod.toFixed(2)}</span>`);
-      return `
-        <div class="card ${isOnboarding ? 'onboarding' : ''}">
-          <div class="card-top">
-            <div class="emoji-box ${it.cat}">${it.emoji}</div>
-            <div class="info">
-              <div class="name">${it.name}</div>
-              <div class="cond">${Math.round(it.condition * 100)}% · ${it.story ? it.story.text : 'хорошее состояние'}</div>
-              ${tags.length ? `<div class="tags-row">${tags.join('')}</div>` : ''}
-            </div>
+      
+      return `<div class="card ${isOnboarding ? 'onboarding' : ''}">
+        <div class="card-top">
+          <div class="emoji-box ${it.cat}">${getIconHtml(it)}</div>
+          <div class="info">
+            <div class="name">${it.name}</div>
+            <div class="cond">${Math.round(it.condition * 100)}% · ${it.story ? it.story.text : 'хорошее состояние'}</div>
+            ${tags.length ? `<div class="tags-row">${tags.join('')}</div>` : ''}
           </div>
-          <div class="rows">
-            <div class="row"><span>Просят</span><b>${fmt(it.askPrice)}</b></div>
-            <div class="row">
-              <span>${known ? 'Реальная цена' : 'Оценка'}</span>
-              <b class="${diff > 0 ? 'good' : 'bad'}">${known ? '' : '~'}${fmt(shown)}</b>
-            </div>
-            ${diff > 0 ? `<div class="row"><span>Потенциал</span><b class="good">+${fmt(diff)}</b></div>` : ''}
-          </div>
-          <div class="actions">
-            ${known
-              ? '<button disabled>✓ Осмотрено</button>'
-              : `<button data-act="inspect" data-id="${it.id}" ${canInspect ? '' : 'disabled'}>${cost === 0 ? '👁 Осмотр' : '👁 ' + fmt(cost)}</button>`}
-            <button class="btn-buy" data-act="buy" data-id="${it.id}" ${canBuy ? '' : 'disabled'}>
-              ${invFull ? 'Нет места' : (canBuy ? '💬 Написать' : 'Нет денег')}
-            </button>
-          </div>
-        </div>`;
+        </div>
+        <div class="rows">
+          <div class="row"><span>Просят</span><b>${fmt(it.askPrice)}</b></div>
+          <div class="row"><span>${known ? 'Реальная цена' : 'Оценка'}</span><b class="${diff > 0 ? 'good' : 'bad'}">${known ? '' : '~'}${fmt(shown)}</b></div>
+          ${diff > 0 ? `<div class="row"><span>Потенциал</span><b class="good">+${fmt(diff)}</b></div>` : ''}
+        </div>
+        <div class="actions">
+          ${known ? '<button disabled>✓ Осмотрено</button>' : `<button data-act="inspect" data-id="${it.id}" ${canInspect ? '' : 'disabled'}>${cost === 0 ? '👁 Осмотр' : '👁 ' + fmt(cost)}</button>`}
+          <button class="btn-buy" data-act="buy" data-id="${it.id}" ${canBuy ? '' : 'disabled'}>${invFull ? 'Нет места' : (canBuy ? '💬 Написать' : 'Нет денег')}</button>
+        </div>
+      </div>`;
     }).join('');
   }
-  html += `<button class="btn-primary btn-full" style="margin-top:8px" onclick="nextDay()">
-    Следующий день →<span style="opacity:.7;font-weight:400;font-size:12px;margin-left:6px">(аренда ${fmt(rentCost())})</span>
-  </button>`;
+  html += `<button class="btn-primary btn-full" style="margin-top:8px" onclick="nextDay()">Следующий день →<span style="opacity:.7;font-weight:400;font-size:12px;margin-left:6px">(аренда ${fmt(rentCost())})</span></button>`;
   return html;
 }
+
 function renderInv() {
   let html = '';
   const slots = invLimit();
   html += `<div class="section-title">Инвентарь ${S.inv.length}/${slots}</div>`;
-  if (S.onboardingStep === 3 && S.inv.length > 0) {
-    html += `<div class="onboarding-tip"><span class="arrow">💬</span> Продай товар — нажми «Продать»</div>`;
-  }
-  if (!S.inv.length) {
-    html += '<div class="empty">Пусто. Купите что-нибудь на рынке.</div>';
-  } else {
+  if (S.onboardingStep === 3 && S.inv.length > 0) html += `<div class="onboarding-tip"><span class="arrow">💬</span> Продай товар — нажми «Продать»</div>`;
+  if (!S.inv.length) html += '<div class="empty">Пусто. Купите что-нибудь на рынке.</div>';
+  else {
     html += S.inv.map(it => {
       const known = it.inspected || S.up.analytics || S.skills.inspect >= 3;
       const orderMatch = S.orders.find(o => !o.done && !o.failed && o.name === it.name && !it.defect);
@@ -989,28 +865,26 @@ function renderInv() {
       if (it.defect) tags.push('<span class="tag tag-defect">⚠️ дефект</span>');
       if (orderMatch) tags.push(`<span class="tag tag-order">📋 ${fmt(orderMatch.reward)}</span>`);
       if (profit > 0 && !it.defect) tags.push(`<span class="tag tag-profit">+${fmt(profit)}</span>`);
-      return `
-        <div class="card">
-          <div class="card-top">
-            <div class="emoji-box ${it.cat}">${it.emoji}</div>
-            <div class="info">
-              <div class="name">${it.name}</div>
-              <div class="cond">${Math.round(it.condition * 100)}% состояние</div>
-              ${tags.length ? `<div class="tags-row">${tags.join('')}</div>` : ''}
-            </div>
+      
+      return `<div class="card">
+        <div class="card-top">
+          <div class="emoji-box ${it.cat}">${getIconHtml(it)}</div>
+          <div class="info">
+            <div class="name">${it.name}</div>
+            <div class="cond">${Math.round(it.condition * 100)}% состояние</div>
+            ${tags.length ? `<div class="tags-row">${tags.join('')}</div>` : ''}
           </div>
-          <div class="rows">
-            <div class="row"><span>Куплено</span><b>${fmt(it.askPrice)}</b></div>
-            <div class="row"><span>${known ? 'Реальная цена' : 'Оценка'}</span>
-              <b class="${it.trueValue > it.askPrice ? 'good' : 'bad'}">${known ? '' : '~'}${fmt(it.trueValue)}</b>
-            </div>
-          </div>
-          <div class="actions">
-            ${it.defect ? `<button data-act="repair" data-id="${it.id}">🔧 Починить</button>` : ''}
-            <button class="btn-sell" data-act="sell" data-id="${it.id}">💬 Продать</button>
-          </div>
-          ${storageLimit() > 0 && S.storage.length < storageLimit() ? `<button class="btn-ghost btn-sm" data-act="store" data-id="${it.id}">→ На склад</button>` : ''}
-        </div>`;
+        </div>
+        <div class="rows">
+          <div class="row"><span>Куплено</span><b>${fmt(it.askPrice)}</b></div>
+          <div class="row"><span>${known ? 'Реальная цена' : 'Оценка'}</span><b class="${it.trueValue > it.askPrice ? 'good' : 'bad'}">${known ? '' : '~'}${fmt(it.trueValue)}</b></div>
+        </div>
+        <div class="actions">
+          ${it.defect ? `<button data-act="repair" data-id="${it.id}">🔧 Починить</button>` : ''}
+          <button class="btn-sell" data-act="sell" data-id="${it.id}">💬 Продать</button>
+        </div>
+        ${storageLimit() > 0 && S.storage.length < storageLimit() ? `<button class="btn-ghost btn-sm" data-act="store" data-id="${it.id}">→ На склад</button>` : ''}
+      </div>`;
     }).join('');
   }
   if (storageLimit() > 0) {
@@ -1018,89 +892,69 @@ function renderInv() {
     if (!S.storage.length) html += '<div class="empty" style="padding:20px">Пусто</div>';
     else html += S.storage.map(it => `
       <div class="card">
-        <div class="card-top">
-          <div class="emoji-box ${it.cat}">${it.emoji}</div>
-          <div class="info"><div class="name">${it.name}</div><div class="cond">На складе с дня ${it.storedDay || '?'}</div></div>
-        </div>
-        <button data-act="unstore" data-id="${it.id}" ${S.inv.length >= invLimit() ? 'disabled' : ''}>
-          ${S.inv.length >= invLimit() ? 'Нет места' : '← В инвентарь'}
-        </button>
+        <div class="card-top"><div class="emoji-box ${it.cat}">${getIconHtml(it)}</div>
+          <div class="info"><div class="name">${it.name}</div><div class="cond">На складе с дня ${it.storedDay || '?'}</div></div></div>
+        <button data-act="unstore" data-id="${it.id}" ${S.inv.length >= invLimit() ? 'disabled' : ''}>${S.inv.length >= invLimit() ? 'Нет места' : '← В инвентарь'}</button>
       </div>`).join('');
   }
   return html;
 }
+
 function renderOrders() {
   let html = '';
   const active = S.orders.filter(o => !o.done && !o.failed);
   const finished = S.orders.filter(o => o.done || o.failed).slice(-5).reverse();
   html += '<div class="section-title">Активные</div>';
-  if (!active.length) {
-    html += '<div class="empty">Заказов нет. Появятся завтра.</div>';
-  } else {
-    html += active.map(o => {
-      const daysLeft = o.deadline - S.day;
-      const urgent = daysLeft <= 1;
-      const hasItem = S.inv.find(i => i.name === o.name && !i.defect);
-      return `
-        <div class="card">
-          <div class="card-top">
-            <div class="emoji-box" style="background:var(--yellow-soft)">${o.emoji}</div>
-            <div class="info">
-              <div class="name">${o.name}</div>
-              <div class="cond" style="color:${urgent ? 'var(--red)' : 'var(--text-3)'}">${urgent ? '⚠️ Срочно · ' : ''}осталось ${daysLeft} дн.</div>
-            </div>
-          </div>
-          <div class="rows">
-            <div class="row"><span>Награда</span><b class="good">${fmt(o.reward)}</b></div>
-            <div class="row"><span>Бонус</span><b class="warn">+${o.bonus}%</b></div>
-          </div>
-          <button class="btn-buy" data-act="order" data-id="${o.id}" ${hasItem ? '' : 'disabled'}>
-            ${hasItem ? '✅ Выполнить заказ' : 'Нужен товар без дефекта'}
-          </button>
-        </div>`;
-    }).join('');
-  }
+  if (!active.length) html += '<div class="empty">Заказов нет. Появятся завтра.</div>';
+  else html += active.map(o => {
+    const daysLeft = o.deadline - S.day;
+    const urgent = daysLeft <= 1;
+    const hasItem = S.inv.find(i => i.name === o.name && !i.defect);
+    return `<div class="card">
+      <div class="card-top"><div class="emoji-box" style="background:var(--surface-2)">${getIconHtml(o)}</div>
+        <div class="info"><div class="name">${o.name}</div>
+          <div class="cond" style="color:${urgent ? 'var(--red)' : 'var(--text-3)'}">${urgent ? '⚠️ Срочно · ' : ''}осталось ${daysLeft} дн.</div></div></div>
+      <div class="rows"><div class="row"><span>Награда</span><b class="good">${fmt(o.reward)}</b></div>
+        <div class="row"><span>Бонус</span><b class="warn">+${o.bonus}%</b></div></div>
+      <button class="btn-buy" data-act="order" data-id="${o.id}" ${hasItem ? '' : 'disabled'}>${hasItem ? '✅ Выполнить заказ' : 'Нужен товар без дефекта'}</button>
+    </div>`;
+  }).join('');
   if (finished.length) {
     html += '<div class="section-title">История</div>';
-    html += finished.map(o => `
-      <div class="card" style="opacity:.6">
-        <div class="card-top">
-          <div class="emoji-box" style="background:var(--surface-2)">${o.emoji}</div>
-          <div class="info"><div class="name">${o.name} ${o.done ? '✅' : '❌'}</div><div class="cond">${o.done ? 'Выполнен' : 'Провален'}</div></div>
-        </div>
-      </div>`).join('');
+    html += finished.map(o => `<div class="card" style="opacity:.6">
+      <div class="card-top"><div class="emoji-box" style="background:var(--surface-2)">${getIconHtml(o)}</div>
+        <div class="info"><div class="name">${o.name} ${o.done ? '✅' : '❌'}</div><div class="cond">${o.done ? 'Выполнен' : 'Провален'}</div></div></div>
+    </div>`).join('');
   }
   return html;
 }
+
 function renderBiz() {
   let html = '';
   const lvl = bizLevel();
   const bl = BUSINESS_LEVELS[lvl];
   const next = BUSINESS_LEVELS[lvl + 1];
   html += `<div class="rank-card">
-    <div class="rank-emoji">${bl.emoji}</div>
-    <div class="rank-name">${bl.name}</div>
+    <div class="rank-emoji">${bl.emoji}</div><div class="rank-name">${bl.name}</div>
     <div class="rank-desc">${next ? 'До ' + next.name + ': ' + fmt(next.min - S.maxMoney) : 'Максимум'}</div>
     <div class="level-bar">${BUSINESS_LEVELS.map((_, i) => `<div class="level-seg ${i <= lvl ? 'on' : ''}"></div>`).join('')}</div>
   </div>`;
+  
   html += '<div class="section-title">Транспорт</div>';
   const nextT = S.transport + 1;
   if (nextT < TRANSPORTS.length) {
     const t = TRANSPORTS[nextT];
     const canBuy = S.money >= t.cost && bizLevel() >= t.reqLevel;
     const reason = bizLevel() < t.reqLevel ? `Нужен: ${BUSINESS_LEVELS[t.reqLevel].name}` : (S.money < t.cost ? 'Нет денег' : '');
-    html += `<div class="card">
-      <div class="card-top"><div class="emoji-box" style="background:var(--primary-soft)">${t.emoji}</div>
-        <div class="info"><div class="name">${t.name}</div><div class="cond">${t.desc}</div></div></div>
+    html += `<div class="card"><div class="card-top"><div class="emoji-box" style="background:var(--primary-soft)">${t.emoji}</div>
+      <div class="info"><div class="name">${t.name}</div><div class="cond">${t.desc}</div></div></div>
       <div class="row"><span>Цена</span><b>${fmt(t.cost)}</b></div>
-      <button class="btn-buy" data-act="transport" data-id="${nextT}" ${canBuy ? '' : 'disabled'}>${canBuy ? 'Купить' : (reason || 'Недоступно')}</button>
-    </div>`;
+      <button class="btn-buy" data-act="transport" data-id="${nextT}" ${canBuy ? '' : 'disabled'}>${canBuy ? 'Купить' : (reason || 'Недоступно')}</button></div>`;
   } else {
-    html += `<div class="card">
-      <div class="card-top"><div class="emoji-box" style="background:var(--green-soft)">${TRANSPORTS[S.transport].emoji}</div>
-        <div class="info"><div class="name">${TRANSPORTS[S.transport].name}</div><div class="cond">✓ Максимум</div></div></div>
-    </div>`;
+    html += `<div class="card"><div class="card-top"><div class="emoji-box" style="background:var(--green-soft)">${TRANSPORTS[S.transport].emoji}</div>
+      <div class="info"><div class="name">${TRANSPORTS[S.transport].name}</div><div class="cond">✓ Максимум</div></div></div></div>`;
   }
+  
   html += `<div class="section-title">Навыки · ${S.skillPoints} SP</div>`;
   for (const [id, sk] of Object.entries(SKILLS)) {
     const lvlS = S.skills[id];
@@ -1111,12 +965,12 @@ function renderBiz() {
           const active = i < lvlS;
           const isNext = i === lvlS && S.skillPoints > 0;
           return `<div class="skill-node ${active ? 'active' : ''} ${isNext ? 'next' : ''}" ${isNext ? `data-act="skill" data-id="${id}"` : ''}>
-            <span class="lvl">${active ? '✓' : (i + 1)}</span><span class="lbl">${desc}</span>
-          </div>`;
+            <span class="lvl">${active ? '✓' : (i + 1)}</span><span class="lbl">${desc}</span></div>`;
         }).join('')}
       </div>
     </div>`;
   }
+  
   html += '<div class="section-title">Улучшения</div>';
   for (const id of ['inventory', 'market']) {
     const u = UPGRADES[id];
@@ -1129,8 +983,7 @@ function renderBiz() {
       const can = S.money >= nextL.cost;
       html += `<div class="card"><div class="card-top"><div class="emoji-box">${u.emoji}</div><div class="info"><div class="name">${u.name}</div><div class="cond">${current} → ${nextL.desc}</div></div></div>
         <div class="row"><span>Цена</span><b>${fmt(nextL.cost)}</b></div>
-        <button class="btn-buy" data-act="upgrade" data-id="${id}" ${can ? '' : 'disabled'}>${can ? 'Купить' : 'Нет денег'}</button>
-      </div>`;
+        <button class="btn-buy" data-act="upgrade" data-id="${id}" ${can ? '' : 'disabled'}>${can ? 'Купить' : 'Нет денег'}</button></div>`;
     }
   }
   for (const id of ['analytics', 'vip', 'negotiation', 'accountant']) {
@@ -1143,6 +996,7 @@ function renderBiz() {
       ${owned ? '<button disabled>✓ Куплено</button>' : `<div class="row"><span>Цена</span><b>${fmt(u.cost)}</b></div><button class="btn-buy" data-act="upgrade" data-id="${id}" ${can ? '' : 'disabled'}>${can ? 'Купить' : 'Нет денег'}</button>`}
     </div>`;
   }
+  
   if (S.transport >= 3) {
     html += '<div class="section-title">Опт — палеты</div>';
     if (S.pallet) {
@@ -1151,18 +1005,17 @@ function renderBiz() {
         <div class="info"><div class="name">Палета вслепую</div><div class="cond">${S.pallet.size} товаров</div></div></div>
         <div class="rows"><div class="row"><span>Цена</span><b>${fmt(S.pallet.price)}</b></div>
         <div class="row"><span>Свободно</span><b class="${S.inv.length + S.pallet.size > invLimit() ? 'bad' : 'good'}">${invLimit() - S.inv.length}/${S.pallet.size}</b></div></div>
-        <button class="btn-buy" data-act="pallet" ${can ? '' : 'disabled'}>${can ? '📦 Купить' : (S.inv.length + S.pallet.size > invLimit() ? 'Мало места' : 'Нет денег')}</button>
-      </div>`;
+        <button class="btn-buy" data-act="pallet" ${can ? '' : 'disabled'}>${can ? '📦 Купить' : (S.inv.length + S.pallet.size > invLimit() ? 'Мало места' : 'Нет денег')}</button></div>`;
     } else html += '<div class="empty">Новая палета через пару дней</div>';
   }
   return html;
 }
+
 function renderProfile() {
   const rank = [...RANKS].reverse().find(r => S.rep >= r.min) || RANKS[0];
   const st = S.stats;
   let html = `<div class="rank-card">
-    <div class="rank-emoji">${rank.emoji}</div>
-    <div class="rank-name">${rank.name}</div>
+    <div class="rank-emoji">${rank.emoji}</div><div class="rank-name">${rank.name}</div>
     <div class="rank-desc">${rank.desc} · репутация ${Math.round(S.rep)}/100</div>
   </div>`;
   html += '<div class="section-title">Статистика</div>';
@@ -1176,11 +1029,13 @@ function renderProfile() {
     <div class="stat-mini"><span class="l">Ремонтов</span><span class="v">${st.repairsDone}</span></div>
     <div class="stat-mini"><span class="l">Заказов</span><span class="v">${st.ordersDone}</span></div>
   </div>`;
+  
   html += `<div class="section-title">Достижения ${Object.keys(S.achievements).length}/${ACHIEVEMENTS.length}</div>`;
   html += '<div class="ach-grid">' + ACHIEVEMENTS.map(a => `
     <div class="ach ${S.achievements[a.id] ? 'unlocked' : ''}">
       <span class="ach-emoji">${a.emoji}</span><span class="ach-name">${a.name}</span><span class="ach-desc">${a.desc}</span>
     </div>`).join('') + '</div>';
+  
   html += '<div class="section-title">Кредит</div>';
   html += `<div class="card">
     <div class="row"><span>Долг</span><b class="${S.credit > 0 ? 'bad' : ''}">${fmt(S.credit)}</b></div>
@@ -1188,6 +1043,7 @@ function renderProfile() {
     <div class="row"><span>Ставка</span><b class="warn">10% в день</b></div>
     ${S.credit > 0 ? `<button class="btn-danger" data-act="payCredit">Погасить ${fmt(S.credit)}</button>` : `<button class="btn-primary" data-act="takeCredit">Взять кредит</button>`}
   </div>`;
+  
   html += '<div class="section-title">Настройки</div>';
   html += `<div class="card">
     <div style="font-size:13px;font-weight:600;margin-bottom:2px">🎨 Тема</div>
@@ -1201,9 +1057,11 @@ function renderProfile() {
     </div>
     <button class="btn-ghost btn-sm" onclick="showPrivacy()">🔒 Конфиденциальность</button>
     <button class="btn-danger btn-sm" data-act="reset">🗑️ Сбросить прогресс</button>
+    <div style="text-align:center;font-size:11px;color:var(--text-3);margin-top:4px">Версия 1.0.0</div>
   </div>`;
   return html;
 }
+
 const PANELS = { market: renderMarket, inv: renderInv, orders: renderOrders, biz: renderBiz, profile: renderProfile };
 function render() {
   renderStats();
@@ -1212,12 +1070,8 @@ function render() {
   el('appMain').innerHTML = `<section class="panel">${PANELS[activeTab]()}</section>`;
   saveDebounced();
 }
-window.hideInstall = () => { S.showInstall = false; render(); };
 window.hideTutorial = () => { S.showTutorial = false; if (S.onboardingStep === 0) S.onboardingStep = 1; render(); };
 
-/* =========================================================
-   ACTIONS — market
-   ========================================================= */
 function inspectLot(id) {
   const it = S.market.find(x => x.id === id);
   if (!it || it.inspected) return;
@@ -1228,13 +1082,9 @@ function inspectLot(id) {
   if (it.defect) { S.stats.defectsFound++; playSound('error'); haptic(20); toast('Найден дефект!', 'error'); }
   else { playSound('click'); toast('Всё чисто'); }
   if (S.onboardingStep === 1) S.onboardingStep = 2;
-  track('inspect', { defect: it.defect });
   render();
 }
 
-/* =========================================================
-   CHAT — BUY
-   ========================================================= */
 function startBuyChat(itemId) {
   const it = S.market.find(x => x.id === itemId);
   if (!it) return;
@@ -1247,23 +1097,16 @@ function startBuyChat(itemId) {
   }
   if (it.isBlack) sellerType = SELLER_TYPES.find(t => t.id === 'greedy');
   chat = {
-    type: 'buy',
-    item: it, seller: sellerType,
+    type: 'buy', item: it, seller: sellerType,
     currentPrice: it.askPrice,
     minPrice: round100(it.askPrice * (1 - sellerType.maxDiscount)),
     patience: sellerType.patience,
     messages: [{ from: 'other', text: sellerType.greeting(it) }],
-    completed: false, abandoned: false,
-    keyboardOpen: false, keyboardValue: '',
-    pending: false,
+    completed: false, abandoned: false, keyboardOpen: false, keyboardValue: '', pending: false,
   };
-  track('chat_buy_open');
   renderChat();
 }
 
-/* =========================================================
-   CHAT — SELL
-   ========================================================= */
 function startSellChat(itemId) {
   const it = S.inv.find(x => x.id === itemId);
   if (!it || chat) return;
@@ -1281,17 +1124,12 @@ function startSellChat(itemId) {
   const maxPrice = round100(buyerPrice);
   const offer = round100(maxPrice * rnd(0.72, 0.9));
   chat = {
-    type: 'sell',
-    item: it, buyer,
+    type: 'sell', item: it, buyer,
     currentPrice: offer, maxPrice,
-    raises: 0,
-    maxRaises: buyer.maxRaises + (S.up.negotiation ? 1 : 0),
+    raises: 0, maxRaises: buyer.maxRaises + (S.up.negotiation ? 1 : 0),
     messages: [{ from: 'other', text: buyer.greeting(it, offer) }],
-    completed: false, abandoned: false,
-    keyboardOpen: false, keyboardValue: '',
-    pending: false,
+    completed: false, abandoned: false, keyboardOpen: false, keyboardValue: '', pending: false,
   };
-  track('chat_sell_open');
   renderChat();
 }
 function pickBuyer() {
@@ -1300,21 +1138,16 @@ function pickBuyer() {
   return pick(pool);
 }
 
-/* =========================================================
-   CHAT RENDER
-   ========================================================= */
 function renderChat() {
   if (!chat) { closeSheet(); return; }
   const c = chat;
   const who = c.type === 'buy' ? c.seller : c.buyer;
   const title = c.type === 'buy' ? 'Продавец' : who.name;
   const status = c.abandoned ? 'оффлайн' : 'в сети';
-  const messagesHtml = c.messages.map(m => `
-    <div class="msg ${m.from === 'me' ? 'me' : 'other'}">
-      ${m.from === 'other' ? `<div class="msg-avatar">${who.emoji}</div>` : ''}
-      <div class="msg-bubble">${m.text}</div>
-    </div>`).join('');
-
+  const messagesHtml = c.messages.map(m => `<div class="msg ${m.from === 'me' ? 'me' : 'other'}">
+    ${m.from === 'other' ? `<div class="msg-avatar">${who.emoji}</div>` : ''}
+    <div class="msg-bubble">${m.text}</div></div>`).join('');
+    
   let actionsHtml = '';
   if (c.completed) {
     const btnText = c.type === 'buy' ? `Купить за ${fmt(c.currentPrice)}` : `Продать за ${fmt(c.currentPrice)}`;
@@ -1328,100 +1161,72 @@ function renderChat() {
     const p = c.currentPrice;
     const quick = QUICK_STEPS.map(s => {
       const np = p - s;
-      const disabled = np < 100;
-      return `<button ${disabled ? 'disabled' : `onclick="playerOfferBuy(${np})"`}>−${s}</button>`;
+      return `<button ${np < 100 ? 'disabled' : `onclick="playerOfferBuy(${np})"`}>−${s}</button>`;
     }).join('');
-    actionsHtml = `
-      <button class="btn-buy btn-full" onclick="playerOfferBuy(${p})" ${c.pending ? 'disabled' : ''}>✓ Взять за ${fmt(p)}</button>
+    actionsHtml = `<button class="btn-buy btn-full" onclick="playerOfferBuy(${p})" ${c.pending ? 'disabled' : ''}>✓ Взять за ${fmt(p)}</button>
       <div class="quick-offers">${quick}</div>
       <button class="btn-primary btn-full" onclick="openCustomKeyboard()">✏️ Своя цена</button>
       <button class="btn-ghost btn-sm" onclick="leaveChat()">Уйти</button>`;
   } else {
     const p = c.currentPrice;
-    const quick = QUICK_STEPS.map(s => {
-      const np = p + s;
-      return `<button onclick="playerCounterSell(${np})">+${s}</button>`;
-    }).join('');
-    actionsHtml = `
-      <button class="btn-sell btn-full" onclick="playerAcceptSell(${p})" ${c.pending ? 'disabled' : ''}>✓ Продать за ${fmt(p)}</button>
+    const quick = QUICK_STEPS.map(s => `<button onclick="playerCounterSell(${p + s})">+${s}</button>`).join('');
+    actionsHtml = `<button class="btn-sell btn-full" onclick="playerAcceptSell(${p})" ${c.pending ? 'disabled' : ''}>✓ Продать за ${fmt(p)}</button>
       <div class="quick-offers">${quick}</div>
       <button class="btn-primary btn-full" onclick="openCustomKeyboard()">✏️ Своя цена</button>
       <button class="btn-ghost btn-sm" onclick="leaveChat()">Уйти</button>`;
   }
-
+  
   const messagesClass = 'chat-messages' + (c.keyboardOpen ? ' compact' : '');
-
   showSheet(`
     <div class="drag-handle"></div>
     <div class="chat-header">
       <div class="chat-avatar">${who.emoji}</div>
-      <div style="flex:1">
-        <div class="chat-name">${title}</div>
-        <div class="chat-status ${c.abandoned ? 'offline' : ''}">${status}</div>
-      </div>
-      <div style="text-align:right;font-size:11px;color:var(--text-3)">
-        Товар<br><b style="color:var(--text);font-size:13px">${fmt(c.currentPrice)}</b>
-      </div>
+      <div style="flex:1"><div class="chat-name">${title}</div>
+        <div class="chat-status ${c.abandoned ? 'offline' : ''}">${status}</div></div>
+      <div style="text-align:right;font-size:11px;color:var(--text-3)">Товар<br><b style="color:var(--text);font-size:13px">${fmt(c.currentPrice)}</b></div>
     </div>
     <div class="${messagesClass}" id="chatMessages">${messagesHtml}</div>
     <div class="chat-actions">${actionsHtml}</div>
   `);
-
   requestAnimationFrame(() => {
     const box = document.getElementById('chatMessages');
     if (box) box.scrollTop = box.scrollHeight;
   });
 }
 
-/* =========================================================
-   CUSTOM KEYBOARD
-   ========================================================= */
 function renderKeyboard() {
   const c = chat;
   const value = c.keyboardValue || '';
   const isBuy = c.type === 'buy';
   const submitLabel = isBuy ? 'Предложить' : 'Запросить';
   const submitDisabled = !value || Number(value) < 100;
-  return `
-    <div class="custom-keyboard">
-      <div class="keyboard-display">
-        <div class="keyboard-label">${isBuy ? 'Сейчас просят' : 'Сейчас дают'}: ${fmt(c.currentPrice)}</div>
-        <div class="keyboard-value ${value ? '' : 'empty'}" id="keyboardValue">${value ? fmt(Number(value)) : '— ₽'}</div>
-      </div>
-      <div class="keyboard-grid">
-        <button class="key-btn" onclick="keyPress('1')">1</button>
-        <button class="key-btn" onclick="keyPress('2')">2</button>
-        <button class="key-btn" onclick="keyPress('3')">3</button>
-        <button class="key-btn" onclick="keyPress('4')">4</button>
-        <button class="key-btn" onclick="keyPress('5')">5</button>
-        <button class="key-btn" onclick="keyPress('6')">6</button>
-        <button class="key-btn" onclick="keyPress('7')">7</button>
-        <button class="key-btn" onclick="keyPress('8')">8</button>
-        <button class="key-btn" onclick="keyPress('9')">9</button>
-        <button class="key-btn key-action" onclick="keyClear()">C</button>
-        <button class="key-btn" onclick="keyPress('0')">0</button>
-        <button class="key-btn key-action" onclick="keyBackspace()">⌫</button>
-      </div>
-      <div class="keyboard-bottom">
-        <button class="btn-ghost" onclick="closeCustomKeyboard()">Отмена</button>
-        <button class="btn-primary keyboard-submit" id="keyboardSubmit" onclick="keySubmit()" ${submitDisabled ? 'disabled' : ''}>${submitLabel}</button>
-      </div>
+  return `<div class="custom-keyboard">
+    <div class="keyboard-display">
+      <div class="keyboard-label">${isBuy ? 'Сейчас просят' : 'Сейчас дают'}: ${fmt(c.currentPrice)}</div>
+      <div class="keyboard-value ${value ? '' : 'empty'}" id="keyboardValue">${value ? fmt(Number(value)) : '— ₽'}</div>
     </div>
-  `;
+    <div class="keyboard-grid">
+      <button class="key-btn" onclick="keyPress('1')">1</button>
+      <button class="key-btn" onclick="keyPress('2')">2</button>
+      <button class="key-btn" onclick="keyPress('3')">3</button>
+      <button class="key-btn" onclick="keyPress('4')">4</button>
+      <button class="key-btn" onclick="keyPress('5')">5</button>
+      <button class="key-btn" onclick="keyPress('6')">6</button>
+      <button class="key-btn" onclick="keyPress('7')">7</button>
+      <button class="key-btn" onclick="keyPress('8')">8</button>
+      <button class="key-btn" onclick="keyPress('9')">9</button>
+      <button class="key-btn key-action" onclick="keyClear()">C</button>
+      <button class="key-btn" onclick="keyPress('0')">0</button>
+      <button class="key-btn key-action" onclick="keyBackspace()">⌫</button>
+    </div>
+    <div class="keyboard-bottom">
+      <button class="btn-ghost" onclick="closeCustomKeyboard()">Отмена</button>
+      <button class="btn-primary keyboard-submit" id="keyboardSubmit" onclick="keySubmit()" ${submitDisabled ? 'disabled' : ''}>${submitLabel}</button>
+    </div>
+  </div>`;
 }
-
-function openCustomKeyboard() {
-  if (!chat) return;
-  chat.keyboardOpen = true;
-  chat.keyboardValue = '';
-  renderChat();
-}
-function closeCustomKeyboard() {
-  if (!chat) return;
-  chat.keyboardOpen = false;
-  chat.keyboardValue = '';
-  renderChat();
-}
+function openCustomKeyboard() { if (!chat) return; chat.keyboardOpen = true; chat.keyboardValue = ''; renderChat(); }
+function closeCustomKeyboard() { if (!chat) return; chat.keyboardOpen = false; chat.keyboardValue = ''; renderChat(); }
 function keyPress(d) {
   if (!chat || !chat.keyboardOpen) return;
   if (chat.keyboardValue.length >= 7) return;
@@ -1430,38 +1235,22 @@ function keyPress(d) {
   playSound('key');
   updateKeyboardDisplay();
 }
-function keyBackspace() {
-  if (!chat || !chat.keyboardOpen) return;
-  chat.keyboardValue = chat.keyboardValue.slice(0, -1);
-  playSound('key');
-  updateKeyboardDisplay();
-}
-function keyClear() {
-  if (!chat || !chat.keyboardOpen) return;
-  chat.keyboardValue = '';
-  playSound('key');
-  updateKeyboardDisplay();
-}
+function keyBackspace() { if (!chat || !chat.keyboardOpen) return; chat.keyboardValue = chat.keyboardValue.slice(0, -1); playSound('key'); updateKeyboardDisplay(); }
+function keyClear() { if (!chat || !chat.keyboardOpen) return; chat.keyboardValue = ''; playSound('key'); updateKeyboardDisplay(); }
 function updateKeyboardDisplay() {
   if (!chat) return;
   const val = chat.keyboardValue;
   const valueEl = document.getElementById('keyboardValue');
   const submitEl = document.getElementById('keyboardSubmit');
-  if (valueEl) {
-    valueEl.textContent = val ? fmt(Number(val)) : '— ₽';
-    valueEl.classList.toggle('empty', !val);
-  }
-  if (submitEl) {
-    submitEl.disabled = !val || Number(val) < 100;
-  }
+  if (valueEl) { valueEl.textContent = val ? fmt(Number(val)) : '— ₽'; valueEl.classList.toggle('empty', !val); }
+  if (submitEl) submitEl.disabled = !val || Number(val) < 100;
 }
 function keySubmit() {
   if (!chat || !chat.keyboardOpen) return;
   const val = Number(chat.keyboardValue);
   if (!val || val < 100) { toast('Минимум 100 ₽', 'error'); return; }
   const type = chat.type;
-  chat.keyboardOpen = false;
-  chat.keyboardValue = '';
+  chat.keyboardOpen = false; chat.keyboardValue = '';
   renderChat();
   if (type === 'buy') playerOfferBuy(val);
   else playerCounterSell(val);
@@ -1473,9 +1262,6 @@ window.keyBackspace = keyBackspace;
 window.keyClear = keyClear;
 window.keySubmit = keySubmit;
 
-/* =========================================================
-   CHAT MESSAGES
-   ========================================================= */
 function appendMessage(from, text) {
   if (!chat) return;
   chat.messages.push({ from, text });
@@ -1484,27 +1270,19 @@ function appendMessage(from, text) {
   const who = chat.type === 'buy' ? chat.seller : chat.buyer;
   const div = document.createElement('div');
   div.className = 'msg ' + (from === 'me' ? 'me' : 'other');
-  div.innerHTML = (from === 'other' ? `<div class="msg-avatar">${who.emoji}</div>` : '') +
-    `<div class="msg-bubble">${text}</div>`;
+  div.innerHTML = (from === 'other' ? `<div class="msg-avatar">${who.emoji}</div>` : '') + `<div class="msg-bubble">${text}</div>`;
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
   playSound('message');
 }
-function updateChatUI() {
-  if (!chat) return;
-  renderChat();
-}
+function updateChatUI() { if (!chat) return; renderChat(); }
 
-/* =========================================================
-   OFFERS
-   ========================================================= */
 function playerOfferBuy(amount) {
   const c = chat;
   if (!c || c.completed || c.abandoned || c.pending || c.keyboardOpen) return;
   amount = Math.max(100, Math.round(amount));
   c.pending = true;
   const snapshot = c;
-
   if (c.currentPrice === amount && amount <= c.item.askPrice) {
     appendMessage('me', `Беру за ${fmt(amount)}`);
     setTimeout(() => {
@@ -1516,7 +1294,6 @@ function playerOfferBuy(amount) {
     }, 400);
     return;
   }
-
   appendMessage('me', `Предлагаю ${fmt(amount)}`);
   setTimeout(() => {
     if (chat !== snapshot) return;
@@ -1539,7 +1316,6 @@ function playerOfferBuy(amount) {
     updateChatUI();
   }, 500 + Math.random() * 400);
 }
-
 function playerAcceptSell(amount) {
   const c = chat;
   if (!c || c.completed || c.abandoned || c.pending || c.keyboardOpen) return;
@@ -1555,7 +1331,6 @@ function playerAcceptSell(amount) {
     updateChatUI();
   }, 400);
 }
-
 function playerCounterSell(amount) {
   const c = chat;
   if (!c || c.completed || c.abandoned || c.pending || c.keyboardOpen) return;
@@ -1584,7 +1359,6 @@ function playerCounterSell(amount) {
     updateChatUI();
   }, 500 + Math.random() * 400);
 }
-
 window.leaveChat = () => {
   if (!chat) { closeSheet(); return; }
   if (chat.type === 'sell' && !chat.completed) S.rep = Math.max(0, S.rep - 1);
@@ -1603,13 +1377,10 @@ function completeBuyFromChat() {
   const price = c.currentPrice;
   if (S.money < price) { toast('Недостаточно денег', 'error'); return; }
   if (S.inv.length >= invLimit()) { toast('Инвентарь полон', 'error'); return; }
-  S.money -= price;
-  S.stats.totalSpent += price;
-  S.stats.itemsBought++;
+  S.money -= price; S.stats.totalSpent += price; S.stats.itemsBought++;
   it.askPrice = price;
   S.market = S.market.filter(x => x.id !== it.id);
   S.inv.push(it);
-
   if (it.isBlack) {
     unlockAch('black_bought');
     if (Math.random() < it.scamChance) {
@@ -1633,7 +1404,6 @@ function completeBuyFromChat() {
       render();
     }, 1500);
   }
-
   if (!it.inspected && it.defect) {
     it.inspected = true;
     S.stats.defectsFound++;
@@ -1643,10 +1413,8 @@ function completeBuyFromChat() {
     S.stats.cleanStreak++;
     checkAch();
   }
-
   playSound('buy'); haptic(20);
   toast(`Куплено за ${fmt(price)}`, 'success');
-  track('buy', { price, item: it.name });
   chat = null;
   if (S.onboardingStep === 2) S.onboardingStep = 3;
   closeSheet();
@@ -1660,19 +1428,15 @@ function completeSellFromChat() {
     const scamItemId = it.id;
     chat = null;
     closeSheet(true);
-    showSheet(`
-      <div class="drag-handle"></div>
+    showSheet(`<div class="drag-handle"></div>
       <h2>😈 Мошенник!</h2>
       <div class="msg"><div class="msg-avatar">😈</div><div class="msg-bubble">Протягивает фальшивые купюры.</div></div>
       <button class="btn-danger btn-full" onclick="scamRefuse()">Отказать (сохранить товар)</button>
-      <button class="btn-ghost btn-full" onclick="scamAccept('${scamItemId}')">Всё равно взять</button>
-    `);
+      <button class="btn-ghost btn-full" onclick="scamAccept('${scamItemId}')">Всё равно взять</button>`);
     return;
   }
   const profit = price - it.askPrice;
-  S.money += price;
-  S.stats.totalEarned += price;
-  S.stats.deals++;
+  S.money += price; S.stats.totalEarned += price; S.stats.deals++;
   if (profit > S.stats.bestDeal) S.stats.bestDeal = profit;
   S.inv = S.inv.filter(x => x.id !== it.id);
   let repGain = 3;
@@ -1682,67 +1446,44 @@ function completeSellFromChat() {
   chat = null;
   playSound('sell'); haptic(20);
   toast(`${profit >= 0 ? '📈' : '📉'} ${profit >= 0 ? '+' : ''}${fmt(profit)}`, profit >= 0 ? 'success' : 'error');
-  track('sell', { price, profit });
-  checkAch();
-  checkRich();
+  checkAch(); checkRich();
   if (S.onboardingStep === 3) S.onboardingStep = 4;
   closeSheet();
 }
 
-window.scamRefuse = () => {
-  S.rep = Math.min(100, S.rep + 2);
-  toast('Товар сохранён', 'success');
-  closeSheet();
-};
+window.scamRefuse = () => { S.rep = Math.min(100, S.rep + 2); toast('Товар сохранён', 'success'); closeSheet(); };
 window.scamAccept = (itemId) => {
   const it = S.inv.find(x => x.id === itemId);
-  if (it) {
-    S.inv = S.inv.filter(x => x.id !== itemId);
-    S.rep = Math.max(0, S.rep - 20);
-    toast('😈 Обманули! −20 репутации', 'error');
-  }
+  if (it) { S.inv = S.inv.filter(x => x.id !== itemId); S.rep = Math.max(0, S.rep - 20); toast('😈 Обманули! −20 репутации', 'error'); }
   closeSheet();
 };
 
-/* =========================================================
-   REPAIR
-   ========================================================= */
 function repairItem(id) {
   const it = S.inv.find(x => x.id === id);
   if (!it || !it.defect) return;
   const masterCost = round100(it.marketValue * 0.2);
-  showSheet(`
-    <div class="drag-handle"></div>
-    <h2>🔧 Ремонт ${it.emoji} ${it.name}</h2>
+  showSheet(`<div class="drag-handle"></div>
+    <h2>🔧 Ремонт ${getIconHtml(it, true)} ${it.name}</h2>
     <div class="hint">Играй сам и экономь, или заплати мастеру</div>
-    <div class="card">
-      <div class="card-top"><div class="emoji-box" style="background:var(--yellow-soft)">🎮</div>
-        <div class="info"><div class="name">Самому (мини-игра)</div><div class="cond">3 раунда · попади в зону</div></div></div>
-      <button class="btn-primary btn-full" onclick="startRepairGame(${id})">🔧 Играть</button>
-    </div>
-    <div class="card">
-      <div class="card-top"><div class="emoji-box" style="background:var(--primary-soft)">👨‍🔧</div>
-        <div class="info"><div class="name">Мастер</div><div class="cond">Гарантированный ремонт</div></div></div>
+    <div class="card"><div class="card-top"><div class="emoji-box" style="background:var(--yellow-soft)">🎮</div>
+      <div class="info"><div class="name">Самому (мини-игра)</div><div class="cond">3 раунда · попади в зону</div></div></div>
+      <button class="btn-primary btn-full" onclick="startRepairGame(${id})">🔧 Играть</button></div>
+    <div class="card"><div class="card-top"><div class="emoji-box" style="background:var(--primary-soft)">👨‍🔧</div>
+      <div class="info"><div class="name">Мастер</div><div class="cond">Гарантированный ремонт</div></div></div>
       <div class="row"><span>Цена</span><b>${fmt(masterCost)}</b></div>
-      <button class="btn-buy btn-full" onclick="repairByMaster(${id})" ${S.money < masterCost ? 'disabled' : ''}>
-        ${S.money >= masterCost ? 'Заплатить ' + fmt(masterCost) : 'Нет денег'}
-      </button>
-    </div>
-    <button class="btn-ghost" onclick="closeSheet()">Отмена</button>
-  `);
+      <button class="btn-buy btn-full" onclick="repairByMaster(${id})" ${S.money < masterCost ? 'disabled' : ''}>${S.money >= masterCost ? 'Заплатить ' + fmt(masterCost) : 'Нет денег'}</button></div>
+    <button class="btn-ghost" onclick="closeSheet()">Отмена</button>`);
 }
 window.repairByMaster = (id) => {
   const it = S.inv.find(x => x.id === id);
   if (!it || !it.defect) return;
   const cost = round100(it.marketValue * 0.2);
   if (S.money < cost) return;
-  S.money -= cost;
-  S.stats.totalSpent += cost;
+  S.money -= cost; S.stats.totalSpent += cost;
   it.defect = false; it.trueValue = it.marketValue; it.inspected = true;
   playSound('buy'); haptic(20);
   closeSheet();
 };
-
 const MG_ROUNDS = [
   { goodMin: 15, goodMax: 85, perfMin: 30, perfMax: 70, speed: 0.30 },
   { goodMin: 20, goodMax: 80, perfMin: 35, perfMax: 65, speed: 0.45 },
@@ -1752,16 +1493,8 @@ function startRepairGame(itemId) {
   const it = S.inv.find(x => x.id === itemId);
   if (!it) return;
   if (repairGame) cancelAnimationFrame(repairGame.rafId);
-  repairGame = {
-    itemId, item: it,
-    round: 0, totalRounds: 3, score: 0, perfect: 0,
-    results: [], speed: 0.30, position: 50, direction: 1,
-    goodMin: 15, goodMax: 85, perfMin: 30, perfMax: 70,
-    running: false, rafId: null, lastResult: null,
-  };
-  setupRound();
-  renderRepairGame();
-  startRepairLoop();
+  repairGame = { itemId, item: it, round: 0, totalRounds: 3, score: 0, perfect: 0, results: [], speed: 0.30, position: 50, direction: 1, goodMin: 15, goodMax: 85, perfMin: 30, perfMax: 70, running: false, rafId: null, lastResult: null };
+  setupRound(); renderRepairGame(); startRepairLoop();
 }
 function setupRound() {
   const g = repairGame;
@@ -1786,17 +1519,13 @@ function renderRepairGame() {
   const g = repairGame;
   if (!g) return;
   const dots = [];
-  for (let i = 0; i < g.totalRounds; i++) {
-    const cls = g.results[i] || (i === g.round ? 'current' : '');
-    dots.push(`<div class="mg-dot ${cls}"></div>`);
-  }
+  for (let i = 0; i < g.totalRounds; i++) dots.push(`<div class="mg-dot ${g.results[i] || (i === g.round ? 'current' : '')}"></div>`);
   let resultHtml = '<div class="mg-result empty">Нажми СТОП в цветной зоне</div>';
   if (g.lastResult === 'perfect') resultHtml = '<div class="mg-result perfect">⭐ Идеально! +2</div>';
   else if (g.lastResult === 'good') resultHtml = '<div class="mg-result good">✓ Попал! +1</div>';
   else if (g.lastResult === 'miss') resultHtml = '<div class="mg-result miss">✗ Мимо!</div>';
-  showSheet(`
-    <div class="drag-handle"></div>
-    <div class="mg-title">🔧 Ремонт</div>
+  showSheet(`<div class="drag-handle"></div>
+    <div class="mg-title">🔧 Ремонт ${getIconHtml(g.item, true)} ${g.item.name}</div>
     <div class="mg-round">Раунд ${g.round + 1} / ${g.totalRounds} · Очки: ${g.score}</div>
     <div class="mg-dots">${dots.join('')}</div>
     <div class="mg-bar">
@@ -1806,8 +1535,7 @@ function renderRepairGame() {
     </div>
     ${resultHtml}
     <button class="btn-primary btn-full" style="padding:18px;font-size:17px" onclick="stopRepair()">🛑 СТОП</button>
-    <button class="btn-ghost btn-full" onclick="abortRepair()">Выйти</button>
-  `);
+    <button class="btn-ghost btn-full" onclick="abortRepair()">Выйти</button>`);
 }
 window.stopRepair = () => {
   const g = repairGame;
@@ -1815,32 +1543,16 @@ window.stopRepair = () => {
   g.running = false;
   cancelAnimationFrame(g.rafId);
   let result;
-  if (g.position >= g.perfMin && g.position <= g.perfMax) {
-    g.score += 2; g.perfect++; result = 'perfect'; playSound('perfect'); haptic(25);
-  } else if (g.position >= g.goodMin && g.position <= g.goodMax) {
-    g.score += 1; result = 'good'; playSound('good'); haptic(15);
-  } else {
-    result = 'miss'; playSound('error'); haptic(30);
-  }
+  if (g.position >= g.perfMin && g.position <= g.perfMax) { g.score += 2; g.perfect++; result = 'perfect'; playSound('perfect'); haptic(25); }
+  else if (g.position >= g.goodMin && g.position <= g.goodMax) { g.score += 1; result = 'good'; playSound('good'); haptic(15); }
+  else { result = 'miss'; playSound('error'); haptic(30); }
   g.lastResult = result;
   g.results[g.round] = result === 'perfect' ? 'perfect' : result === 'good' ? 'hit' : 'miss';
   g.round++;
-  if (g.round >= g.totalRounds) {
-    renderRepairGame();
-    setTimeout(finishRepairGame, 900);
-  } else {
-    renderRepairGame();
-    setTimeout(() => {
-      if (!repairGame) return;
-      setupRound(); renderRepairGame(); startRepairLoop();
-    }, 900);
-  }
+  if (g.round >= g.totalRounds) { renderRepairGame(); setTimeout(finishRepairGame, 900); }
+  else { renderRepairGame(); setTimeout(() => { if (!repairGame) return; setupRound(); renderRepairGame(); startRepairLoop(); }, 900); }
 };
-window.abortRepair = () => {
-  if (repairGame) cancelAnimationFrame(repairGame.rafId);
-  repairGame = null;
-  closeSheet();
-};
+window.abortRepair = () => { if (repairGame) cancelAnimationFrame(repairGame.rafId); repairGame = null; closeSheet(); };
 function finishRepairGame() {
   const g = repairGame;
   if (!g) return;
@@ -1853,61 +1565,44 @@ function finishRepairGame() {
   else if (g.score >= 1) { payCost = round100(masterCost * 0.5); fixed = true; emoji = '🔧'; summaryText = 'Починил, но не идеально'; }
   else { fixed = false; emoji = '💀'; summaryText = 'Провал! Стало хуже'; }
   if (S.money < payCost) payCost = Math.max(0, S.money);
-  showSheet(`
-    <div class="drag-handle"></div>
-    <div class="mg-summary">
-      <div class="big">${emoji}</div>
-      <div class="txt">${summaryText}</div>
+  showSheet(`<div class="drag-handle"></div>
+    <div class="mg-summary"><div class="big">${emoji}</div><div class="txt">${summaryText}</div>
       <div class="sub">Очки: ${g.score}/6 · ${g.perfect} perfect</div>
       <div class="rows" style="text-align:left;background:var(--surface-2);padding:12px;border-radius:12px">
         ${payCost > 0 ? `<div class="row"><span>Заплатить</span><b>${fmt(payCost)}</b></div>` : ''}
         <div class="row"><span>Результат</span><b class="${fixed ? 'good' : 'bad'}">${fixed ? '✓ Починен' : '✗ Сломан'}</b></div>
-      </div>
-    </div>
-    <button class="btn-primary btn-full" onclick="confirmRepairResult(${fixed}, ${payCost})">Готово</button>
-  `);
+      </div></div>
+    <button class="btn-primary btn-full" onclick="confirmRepairResult(${fixed}, ${payCost})">Готово</button>`);
 }
 window.confirmRepairResult = (fixed, payCost) => {
   const g = repairGame;
   if (!g) { closeSheet(); return; }
   const it = g.item;
-  S.money -= payCost;
-  S.stats.totalSpent += payCost;
+  S.money -= payCost; S.stats.totalSpent += payCost;
   if (fixed) {
     it.defect = false; it.trueValue = it.marketValue; it.inspected = true;
     S.stats.repairsDone++;
     playSound('sell');
     if (g.score >= 4) unlockAch('first_repair');
     if (g.score === 6) unlockAch('perfect_repair');
-    track('repair', { score: g.score });
-  } else {
-    it.trueValue = round100(it.trueValue * 0.85);
-    playSound('error');
-  }
+  } else { it.trueValue = round100(it.trueValue * 0.85); playSound('error'); }
   repairGame = null;
   closeSheet();
 };
 
-/* =========================================================
-   ORDERS / UPGRADES / MISC
-   ========================================================= */
 function completeOrder(orderId) {
   const o = S.orders.find(x => x.id === orderId);
   if (!o || o.done || o.failed) return;
   const it = S.inv.find(i => i.name === o.name && !i.defect);
   if (!it) return;
   S.inv = S.inv.filter(x => x.id !== it.id);
-  S.money += o.reward;
-  S.stats.totalEarned += o.reward;
-  S.stats.deals++;
-  S.stats.ordersDone++;
+  S.money += o.reward; S.stats.totalEarned += o.reward; S.stats.deals++; S.stats.ordersDone++;
   S.rep = Math.min(100, S.rep + 8);
   o.done = true;
   const profit = o.reward - it.askPrice;
   if (profit > S.stats.bestDeal) S.stats.bestDeal = profit;
   toast(`✅ Заказ! +${fmt(profit)}`, 'success');
   playSound('sell'); haptic(30);
-  track('order_done', { profit });
   checkAch(); checkRich(); render();
 }
 function buyUpgrade(id) {
@@ -1927,7 +1622,6 @@ function buyUpgrade(id) {
   }
   toast(`✓ ${u.name}`, 'success');
   playSound('buy'); haptic(20);
-  track('upgrade', { id });
   render();
 }
 function buyTransport(level) {
@@ -1937,16 +1631,13 @@ function buyTransport(level) {
   S.money -= t.cost; S.stats.totalSpent += t.cost;
   S.transport = level;
   toast(`🚗 ${t.name}`, 'success');
-  playSound('buy'); haptic(30);
-  render();
+  playSound('buy'); haptic(30); render();
 }
 function buySkill(branch) {
   if (S.skillPoints <= 0 || S.skills[branch] >= 3) return;
-  S.skills[branch]++;
-  S.skillPoints--;
+  S.skills[branch]++; S.skillPoints--;
   toast(`⭐ ${SKILLS[branch].name} ур. ${S.skills[branch]}`, 'success');
-  playSound('ach'); haptic(20);
-  render();
+  playSound('ach'); haptic(20); render();
 }
 function buyPallet() {
   if (!S.pallet || S.transport < 3) return;
@@ -1954,97 +1645,83 @@ function buyPallet() {
   if (S.money < p.price || S.inv.length + p.size > invLimit()) return;
   S.money -= p.price; S.stats.totalSpent += p.price;
   const items = [];
-  for (let i = 0; i < p.size; i++) {
-    const it = makeLot();
-    S.inv.push(it); items.push(it);
-  }
+  for (let i = 0; i < p.size; i++) { const it = makeLot(); S.inv.push(it); items.push(it); }
   S.pallet = null;
   unlockAch('pallet_first');
-  showSheet(`
-    <div class="drag-handle"></div>
-    <h2>📦 Палета распакована!</h2>
-    <div class="rows">${items.map(it => `<div class="row"><span>${it.emoji} ${it.name}</span><b>${fmt(it.marketValue)}</b></div>`).join('')}</div>
-    <button class="btn-primary btn-full" onclick="closeSheet()">Отлично</button>
-  `);
-  playSound('buy'); haptic(40);
-  render();
+  showSheet(`<div class="drag-handle"></div><h2>📦 Палета распакована!</h2>
+    <div class="rows">${items.map(it => `<div class="row"><span>${getIconHtml(it, true)} ${it.name}</span><b>${fmt(it.marketValue)}</b></div>`).join('')}</div>
+    <button class="btn-primary btn-full" onclick="closeSheet()">Отлично</button>`);
+  playSound('buy'); haptic(40); render();
 }
 function storeItem(id) {
   const it = S.inv.find(x => x.id === id);
   if (!it || S.storage.length >= storageLimit()) return;
-  S.inv = S.inv.filter(x => x.id !== id);
-  it.storedDay = S.day;
-  S.storage.push(it);
-  render();
+  S.inv = S.inv.filter(x => x.id !== id); it.storedDay = S.day; S.storage.push(it); render();
 }
 function unstoreItem(id) {
   const it = S.storage.find(x => x.id === id);
   if (!it || S.inv.length >= invLimit()) return;
-  S.storage = S.storage.filter(x => x.id !== id);
-  delete it.storedDay;
-  S.inv.push(it);
-  render();
+  S.storage = S.storage.filter(x => x.id !== id); delete it.storedDay; S.inv.push(it); render();
 }
 function takeCredit() {
   const limit = creditLimit();
   if (S.credit >= limit) { toast('Лимит достигнут', 'error'); return; }
   const avail = limit - S.credit;
-  showSheet(`
-    <div class="drag-handle"></div>
+  showSheet(`<div class="drag-handle"></div>
     <h2>💳 Взять кредит</h2>
     <div class="hint">Доступно: ${fmt(avail)}. Ставка 10% в день.</div>
     <input id="creditInput" type="number" placeholder="Сумма" inputmode="numeric" value="${Math.min(avail, 5000)}" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-family:inherit;font-size:16px;font-weight:600;text-align:center;width:100%">
     <button class="btn-primary btn-full" onclick="confirmCredit()">Взять</button>
-    <button class="btn-ghost btn-full" onclick="closeSheet()">Отмена</button>
-  `);
+    <button class="btn-ghost btn-full" onclick="closeSheet()">Отмена</button>`);
 }
 window.confirmCredit = () => {
   const inp = el('creditInput');
   if (!inp) return;
-  const limit = creditLimit();
-  const avail = limit - S.credit;
+  const limit = creditLimit(); const avail = limit - S.credit;
   const n = Math.max(0, Math.min(avail, Math.round(Number(inp.value || 0) / 100) * 100));
   if (!n) { toast('Введите сумму', 'error'); return; }
   S.credit += n; S.money += n;
   toast(`💳 +${fmt(n)}`, 'success');
-  track('credit_take', { amount: n });
   closeSheet();
 };
 function payCredit() {
   if (S.credit <= 0 || S.money < S.credit) { toast('Недостаточно средств', 'error'); return; }
   showConfirm(`Погасить ${fmt(S.credit)}?`, 'Кредит будет полностью закрыт.', () => {
-    S.money -= S.credit; S.stats.totalSpent += S.credit;
-    S.credit = 0;
-    toast('💳 Кредит закрыт', 'success');
-    render();
+    S.money -= S.credit; S.stats.totalSpent += S.credit; S.credit = 0;
+    toast('💳 Кредит закрыт', 'success'); render();
   });
 }
-
+function resetGame() {
+  showConfirm('Сбросить прогресс?', 'Все достижения и деньги будут удалены. Начать заново?', () => {
+    const theme = S.theme;
+    SafeStorage.remove(SAVE_KEY);
+    S = defaultState();
+    S.theme = theme;
+    chat = null; repairGame = null; idc = 0;
+    newMarket(); makeOrder();
+    render();
+    toast('Игра сброшена', 'success');
+  }, true);
+}
 function checkDailyBonus() {
   const today = new Date().toDateString();
   if (S.lastBonusDate === today) return;
   const yesterday = new Date(Date.now() - 86400000).toDateString();
   S.dailyStreak = (S.lastBonusDate === yesterday) ? S.dailyStreak + 1 : 1;
   const bonus = Math.min(500 + (S.dailyStreak - 1) * 500, 5000);
-  S.money += bonus;
-  S.lastBonusDate = today;
+  S.money += bonus; S.lastBonusDate = today;
   const b = document.createElement('div');
   b.className = 'bonus-toast';
   b.innerHTML = `🎁 Бонус за вход<br><div class="amt">+${fmt(bonus)}</div>День ${S.dailyStreak} подряд`;
   document.body.appendChild(b);
   setTimeout(() => b.remove(), 2500);
   haptic(50);
-  track('daily_bonus', { streak: S.dailyStreak });
 }
-
 function nextDay() {
   if (chat || repairGame) return;
   S.day++;
   const rent = rentCost();
-  if (S.money < rent) {
-    S.rep = Math.max(0, S.rep - 10);
-    toast(`⚠️ Аренда — не хватает! −10 репутации`, 'error');
-  }
+  if (S.money < rent) { S.rep = Math.max(0, S.rep - 10); toast(`⚠️ Аренда — не хватает! −10 репутации`, 'error'); }
   S.money -= rent;
   if (S.credit > 0) S.credit += creditInterest();
   S.event = null;
@@ -2060,35 +1737,22 @@ function nextDay() {
     ]);
   }
   newMarket();
-  S.orders.forEach(o => {
-    if (!o.done && !o.failed && S.day > o.deadline) {
-      o.failed = true;
-      S.rep = Math.max(0, S.rep - 5);
-    }
-  });
+  S.orders.forEach(o => { if (!o.done && !o.failed && S.day > o.deadline) { o.failed = true; S.rep = Math.max(0, S.rep - 5); } });
   if (Math.random() < 0.55) makeOrder();
   if (Math.random() < 0.2) makeOrder();
-  if (S.transport >= 3 && (!S.pallet || S.day - S.pallet.day >= 3)) {
-    if (Math.random() < 0.6) makePallet();
-  }
+  if (S.transport >= 3 && (!S.pallet || S.day - S.pallet.day >= 3)) { if (Math.random() < 0.6) makePallet(); }
   playSound('click'); haptic(10);
-  track('day', { day: S.day });
   render();
 }
-
 function checkRich() {
   if (S.money >= TARGET_MONEY && !S.wasRich) {
     S.wasRich = true;
-    track('goal_reached', { day: S.day });
     setTimeout(() => {
       showAlert('Цель достигнута!', `Баланс: ${fmt(S.money)}<br>Дней: ${S.day}<br>Сделок: ${S.stats.deals}<br><br>Следующая цель — 2 000 000₽ (Империя)!`, '🏆');
     }, 400);
   }
 }
 
-/* =========================================================
-   EVENT HANDLERS
-   ========================================================= */
 el('modal').addEventListener('click', e => {
   if (e.target === el('modal') && !chat && !repairGame && !confirmCallback) closeSheet();
 });
@@ -2143,13 +1807,8 @@ el('appMain').addEventListener('touchend', e => {
   }
 }, { passive: true });
 
-/* =========================================================
-   START
-   ========================================================= */
 window.startGame = () => {
   el('splash').classList.add('hidden');
-  gameStarted = true;
-  track('game_start');
   if (!S.market.length) newMarket();
   render();
   checkDailyBonus();
@@ -2161,21 +1820,16 @@ function init() {
   document.documentElement.setAttribute('data-theme', S.theme);
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.content = S.theme === 'dark' ? '#0a0e14' : '#f5f6f8';
-  if (!loaded) {
-    newMarket();
-    makeOrder();
-  }
+  if (!loaded) { newMarket(); makeOrder(); }
   if (!S.market.length) newMarket();
   if (!loaded && !S.firstPlayed) {
-    el('splashLoading').textContent = SafeStorage.available ? '' : '⚠️ Сохранение недоступно в этом режиме';
     S.firstPlayed = true;
+    el('splashLoading').textContent = SafeStorage.available ? '' : '⚠️ Сохранение недоступно';
   } else {
     el('splash').classList.add('hidden');
-    gameStarted = true;
     render();
     checkDailyBonus();
     render();
-    setTimeout(() => toast('💾 Прогресс загружен', 'success'), 300);
   }
   saveDebounced();
 }
@@ -2183,3 +1837,4 @@ init();
 </script>
 </body>
 </html>
+
