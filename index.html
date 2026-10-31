@@ -1,2065 +1,614 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>P2P Simulator — торговля USDT</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#05070a;--panel:#0e1218;--panel2:#141a21;--panel3:#1a222b;
-  --border:rgba(255,255,255,.055);--border-hi:rgba(255,255,255,.11);
-  --text:#f0f4f9;--text-dim:#b3bfcc;--muted:#6b7785;
-  --green:#10e88a;--green-d:#0aca76;--green-glow:rgba(16,232,138,.45);
-  --red:#ff4d6d;--red-d:#e63954;--yellow:#ffd23f;--blue:#5b9dff;--purple:#9b6dff;
-  --spring:cubic-bezier(.34,1.4,.64,1);--smooth:cubic-bezier(.4,0,.2,1);
-  --out:cubic-bezier(.2,.9,.3,1.1);
-}
-[data-theme="light"]{
-  --bg:#e8edf2;--panel:#ffffff;--panel2:#f1f4f8;--panel3:#e4e9f0;
-  --border:rgba(0,0,0,.08);--border-hi:rgba(0,0,0,.14);
-  --text:#141b25;--text-dim:#3d4a5c;--muted:#5c6b7d;
-  --green-glow:rgba(16,200,120,.4);
-}
-[data-theme="light"] body::before{background:radial-gradient(1100px 700px at 5% -20%,rgba(91,157,255,.14),transparent 55%),radial-gradient(900px 600px at 95% -10%,rgba(155,109,255,.1),transparent 55%),radial-gradient(900px 600px at 50% 115%,rgba(16,200,120,.06),transparent 60%)}
-[data-theme="light"] body::after{opacity:.4}
-[data-theme="light"] body>#grain{opacity:.02}
-[data-theme="light"] .topbar{background:rgba(245,248,252,.82)}
-[data-theme="light"] .mobile-nav{background:rgba(245,248,252,.95)}
-[data-theme="light"] .modal{background:linear-gradient(180deg,#fff,#f7f9fc)}
-[data-theme="light"] .onboard-overlay{background:radial-gradient(circle at 50% 30%,rgba(245,248,252,.9),rgba(232,237,242,.98))}
-[data-theme="light"] .onboard-card{background:linear-gradient(180deg,#fff,#f7f9fc)}
-[data-theme="light"] .bal b{background:linear-gradient(135deg,#141b25,#3d4a5c);-webkit-background-clip:text;background-clip:text}
-html,body{height:100%}
-body{background:var(--bg);color:var(--text);font:14px/1.5 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;font-feature-settings:'cv11','ss01','tnum';min-height:100vh;position:relative;overflow-x:hidden;transition:background .3s}
-body::before{content:'';position:fixed;inset:0;z-index:-2;background:radial-gradient(1100px 700px at 5% -20%,rgba(91,157,255,.16),transparent 55%),radial-gradient(900px 600px at 95% -10%,rgba(155,109,255,.14),transparent 55%),radial-gradient(900px 600px at 50% 115%,rgba(16,232,138,.08),transparent 60%);pointer-events:none;transition:background .3s}
-body::after{content:'';position:fixed;inset:0;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(circle at 50% 20%,black,transparent 75%);-webkit-mask-image:radial-gradient(circle at 50% 20%,black,transparent 75%);pointer-events:none}
-body>#grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");mix-blend-mode:overlay}
-button{font:inherit;cursor:pointer;border:none;background:none;color:inherit;-webkit-tap-highlight-color:transparent}
-input,select,textarea{font:inherit;color:inherit;background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:11px 14px;width:100%;outline:none;transition:border-color .2s var(--smooth),box-shadow .25s var(--smooth),background .2s var(--smooth)}
-textarea{resize:vertical;min-height:60px;font-family:inherit}
-input::placeholder,textarea::placeholder{color:var(--muted)}
-input:hover,select:hover,textarea:hover{border-color:var(--border-hi)}
-input:focus,select:focus,textarea:focus{border-color:rgba(91,157,255,.55);box-shadow:0 0 0 4px rgba(91,157,255,.13);background:var(--panel3)}
-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%236b7785' d='M6 8.5 1.5 4h9z'/></svg>");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px}
-::-webkit-scrollbar{width:10px;height:10px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
-::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.15);background-clip:padding-box}
-
-/* ============ ANIMATIONS ============ */
-@keyframes fade{from{opacity:0}to{opacity:1}}
-@keyframes pop{from{transform:scale(.93) translateY(8px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
-@keyframes slide{from{transform:translateY(22px);opacity:0}to{transform:translateY(0);opacity:1}}
-@keyframes tabIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes adIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes msgIn{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-@keyframes onlinePulse{0%,100%{box-shadow:0 0 8px var(--green),0 0 0 0 rgba(16,232,138,.5)}50%{box-shadow:0 0 16px var(--green),0 0 0 4px rgba(16,232,138,0)}}
-@keyframes badgeBounce{0%{transform:scale(0)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
-@keyframes checkPop{0%{transform:scale(0) rotate(-45deg)}60%{transform:scale(1.15) rotate(6deg)}100%{transform:scale(1.05) rotate(0)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
-@keyframes statusPulse{0%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(1.25)}}
-@keyframes toastProgress{from{width:100%}to{width:0}}
-@keyframes ripple{to{transform:scale(4);opacity:0}}
-@keyframes flashUp{0%{color:var(--green);text-shadow:0 0 24px var(--green)}100%{color:var(--text);text-shadow:none}}
-@keyframes flashDown{0%{color:var(--red);text-shadow:0 0 24px var(--red)}100%{color:var(--text);text-shadow:none}}
-@keyframes copyPulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
-@keyframes drawLine{to{stroke-dashoffset:0}}
-@keyframes modalChild{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulseGlow{0%,100%{box-shadow:0 0 20px -6px var(--green-glow)}50%{box-shadow:0 0 36px -6px var(--green-glow)}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-@keyframes fall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
-@keyframes numberPulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
-
-/* ============ TOPBAR ============ */
-.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 24px;background:rgba(8,11,15,.7);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6);border-bottom:1px solid var(--border);transition:background .3s}
-.topbar::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(91,157,255,.55),rgba(155,109,255,.55),transparent);opacity:.55;background-size:200% 100%;animation:shimmer 4s linear infinite}
-.logo{font-weight:800;font-size:20px;letter-spacing:-.7px;white-space:nowrap;background:linear-gradient(135deg,#fff 20%,#a7c8ff 90%);-webkit-background-clip:text;background-clip:text;color:transparent;transition:filter .2s}
-.logo:hover{filter:brightness(1.2)}
-[data-theme="light"] .logo{background:linear-gradient(135deg,#141b25 20%,#3d4a5c 90%);-webkit-background-clip:text;background-clip:text}
-.logo span{background:linear-gradient(135deg,var(--yellow),#ff9d3f);-webkit-background-clip:text;background-clip:text;color:transparent}
-.tabs{display:flex;gap:2px;padding:4px;border-radius:14px;position:relative;background:rgba(255,255,255,.028);border:1px solid var(--border);backdrop-filter:blur(10px)}
-[data-theme="light"] .tabs{background:rgba(0,0,0,.03)}
-.tabs button{padding:9px 15px;border-radius:10px;color:var(--muted);font-weight:600;font-size:12.5px;letter-spacing:.1px;transition:all .25s var(--spring);white-space:nowrap;position:relative;z-index:1}
-.tabs button:hover{color:var(--text-dim);transform:translateY(-1px)}
-.tabs button.active{color:var(--text);background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.035));box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 6px 16px -4px rgba(0,0,0,.5)}
-.tabs button .badge{position:absolute;top:-4px;right:-4px;background:linear-gradient(135deg,var(--red),#ff2d55);color:#fff;font-size:9px;font-weight:700;min-width:17px;height:17px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 0 12px rgba(255,77,109,.55),0 0 0 2px rgba(8,11,15,.9);animation:badgeBounce .5s var(--spring)}
-.icon-btn{position:relative;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .25s var(--spring);flex-shrink:0;overflow:hidden}
-.icon-btn:hover{background:rgba(255,255,255,.08);border-color:var(--border-hi);transform:translateY(-2px) rotate(-3deg)}
-.icon-btn:active{transform:translateY(0) rotate(0)}
-.icon-btn .bell-badge{position:absolute;top:-4px;right:-4px;background:linear-gradient(135deg,var(--red),#ff2d55);color:#fff;font-size:9.5px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 0 0 2px rgba(8,11,15,.9);animation:badgeBounce .5s var(--spring)}
-.icon-btn .bell-badge.hide{display:none}
-.wallet{margin-left:auto;display:flex;gap:10px}
-.bal{background:linear-gradient(180deg,rgba(255,255,255,.038),rgba(255,255,255,.008));border:1px solid var(--border);border-radius:14px;padding:9px 15px;min-width:132px;position:relative;overflow:hidden;transition:all .25s var(--spring)}
-.bal:hover{border-color:var(--border-hi);transform:translateY(-1px)}
-.bal::before{content:'';position:absolute;inset:0;border-radius:14px;pointer-events:none;background:linear-gradient(135deg,rgba(91,157,255,.07),transparent 55%)}
-.bal span{display:block;font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;font-weight:600;margin-bottom:3px}
-.bal b{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;cursor:pointer;user-select:none;letter-spacing:-.3px;background:linear-gradient(135deg,#fff,#b8d0ff);-webkit-background-clip:text;background-clip:text;color:transparent;transition:opacity .2s}
-.bal b:hover{opacity:.75}
-.bal b.hidden{-webkit-text-fill-color:var(--muted);letter-spacing:3px;background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--muted)}
-.spark-container{display:flex;align-items:center;gap:8px;padding:0 10px}
-.spark-info{font-size:11px;color:var(--muted);font-weight:500;white-space:nowrap}
-.spark-info b{color:var(--text);font-variant-numeric:tabular-nums;font-size:12.5px;transition:color .3s}
-#sparkChart svg polyline{stroke-dasharray:300;stroke-dashoffset:300;animation:drawLine 1.2s var(--smooth) forwards}
-
-/* ============ MAIN ============ */
-main{max-width:1200px;margin:0 auto;padding:28px 24px 80px}
-.section-title{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;animation:tabIn .35s var(--out)}
-.section-title h2{font-size:20px;font-weight:700;letter-spacing:-.4px}
-.section-title .hint{color:var(--muted);font-size:11.5px;font-weight:600;background:rgba(255,255,255,.04);padding:4px 11px;border-radius:20px;border:1px solid var(--border);letter-spacing:.2px;transition:.2s}
-[data-theme="light"] .section-title .hint{background:rgba(0,0,0,.04)}
-
-/* ============ VIEW TRANSITIONS ============ */
-#view-buy, #view-sell, #view-myads, #view-orders, #view-profile {animation:tabIn .35s var(--out)}
-
-/* ============ EVENT / ARB BANNERS ============ */
-.event-banner{background:linear-gradient(135deg,rgba(91,157,255,.12),rgba(155,109,255,.06));border:1px solid rgba(91,157,255,.3);border-radius:14px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;animation:slide .35s var(--spring);position:relative;overflow:hidden}
-.event-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(91,157,255,.5),transparent);animation:shimmer 3s infinite;background-size:200% 100%}
-.event-banner .e-ico{font-size:20px;animation:float 3s ease-in-out infinite}
-.event-banner .e-text{flex:1;font-size:13px;font-weight:500}
-.event-banner .e-close{color:var(--muted);font-size:16px;padding:4px;transition:.2s;border-radius:6px}
-.event-banner .e-close:hover{color:var(--text);background:rgba(255,255,255,.06);transform:rotate(90deg)}
-.arb-banner{background:linear-gradient(135deg,rgba(255,210,63,.12),rgba(255,210,63,.03));border:1px solid rgba(255,210,63,.35);border-radius:14px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;animation:slide .35s var(--spring);position:relative;overflow:hidden}
-.arb-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,210,63,.5),transparent);animation:shimmer 3s infinite;background-size:200% 100%}
-.arb-banner .e-ico{font-size:20px;animation:float 2.5s ease-in-out infinite}
-.arb-banner .e-text{flex:1;font-size:13px;font-weight:500}
-.arb-banner .e-text b{color:var(--yellow)}
-
-/* ============ FILTERS ============ */
-.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;align-items:center;animation:tabIn .4s var(--out)}
-.filters select,.filters input{width:auto;min-width:140px;padding:10px 14px;font-size:13px}
-.filters input.search{min-width:180px}
-.filters label.toggle{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.032);border:1px solid var(--border);border-radius:12px;padding:9px 14px;font-size:12.5px;cursor:pointer;color:var(--text-dim);font-weight:500;transition:all .2s var(--spring);margin:0}
-.filters label.toggle:hover{border-color:var(--border-hi);transform:translateY(-1px)}
-.filters label.toggle input{width:auto;margin:0;accent-color:var(--green);cursor:pointer}
-.filters label.toggle.on{border-color:rgba(16,232,138,.4);background:rgba(16,232,138,.08);color:var(--text)}
-.filters .rate{margin-left:auto;color:var(--muted);font-size:12px;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(16,232,138,.1),rgba(16,232,138,.02));border:1px solid rgba(16,232,138,.22);padding:8px 14px;border-radius:12px;transition:.2s}
-.filters .rate:hover{border-color:rgba(16,232,138,.4)}
-.filters .rate b{color:var(--green);font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
-.spread-pill{background:linear-gradient(135deg,rgba(91,157,255,.12),rgba(91,157,255,.02));border:1px solid rgba(91,157,255,.22);color:var(--blue);padding:8px 14px;border-radius:12px;font-size:12px;font-weight:600;transition:.2s}
-.spread-pill:hover{border-color:rgba(91,157,255,.4);transform:translateY(-1px)}
-
-/* ============ AD CARD ============ */
-.ads-list{display:flex;flex-direction:column;gap:12px}
-.ad{display:grid;grid-template-columns:1.6fr .9fr .9fr 1.1fr 1.15fr auto;gap:16px;align-items:center;background:linear-gradient(180deg,rgba(255,255,255,.032),rgba(255,255,255,.005));border:1px solid var(--border);border-radius:18px;padding:16px 20px;transition:all .28s var(--smooth);position:relative;overflow:hidden;animation:adIn .4s var(--out) backwards}
-.ad:nth-child(1){animation-delay:0s}.ad:nth-child(2){animation-delay:.03s}.ad:nth-child(3){animation-delay:.06s}.ad:nth-child(4){animation-delay:.09s}.ad:nth-child(5){animation-delay:.12s}.ad:nth-child(6){animation-delay:.15s}.ad:nth-child(7){animation-delay:.18s}.ad:nth-child(8){animation-delay:.21s}
-.ad::before{content:'';position:absolute;inset:0;border-radius:18px;pointer-events:none;background:linear-gradient(135deg,rgba(91,157,255,.08),transparent 45%);opacity:0;transition:opacity .28s}
-.ad:hover{border-color:var(--border-hi);transform:translateY(-3px);box-shadow:0 20px 48px -16px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.03) inset}
-.ad:hover::before{opacity:1}
-.ad.favorite{border-color:rgba(255,210,63,.3)}
-.ad-user{display:flex;align-items:center;gap:12px;min-width:0;position:relative;z-index:1}
-.ava{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;background:linear-gradient(135deg,#22303f,#141b24);border:1px solid rgba(255,255,255,.07);color:#a9c8ff;position:relative;box-shadow:inset 0 1px 0 rgba(255,255,255,.06);cursor:pointer;transition:transform .3s var(--spring)}
-[data-theme="light"] .ava{background:linear-gradient(135deg,#d9e4f2,#e8eff8);color:#3d6bb3;border-color:rgba(0,0,0,.06)}
-.ava:hover{transform:scale(1.08) rotate(-4deg)}
-.ava .online{position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2.5px solid var(--panel);animation:onlinePulse 2.2s ease-in-out infinite}
-.fav-btn{position:absolute;top:-4px;left:-4px;width:18px;height:18px;border-radius:6px;background:var(--panel);border:1px solid var(--border);color:var(--muted);font-size:10px;display:flex;align-items:center;justify-content:center;transition:all .2s var(--spring);cursor:pointer;z-index:2;line-height:1}
-.fav-btn:hover{border-color:var(--yellow);color:var(--yellow);transform:scale(1.2) rotate(-10deg)}
-.fav-btn.on{background:var(--yellow);border-color:var(--yellow);color:#1a1200;animation:badgeBounce .4s var(--spring)}
-.ad-name{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.1px;cursor:pointer;transition:color .2s}
-.ad-name:hover{color:var(--blue)}
-.vbadge{background:linear-gradient(135deg,var(--yellow),#ffb020);color:#1a1200;font-size:9px;width:15px;height:15px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0;box-shadow:0 0 8px rgba(255,210,63,.4);animation:pulse 2.5s infinite}
-.ad-stats{font-size:11.5px;color:var(--muted);white-space:nowrap;margin-top:3px}
-.ad-price b{font-size:17px;display:block;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.5px;transition:color .3s}
-.ad-price b.flash-up{animation:flashUp .9s ease-out}
-.ad-price b.flash-down{animation:flashDown .9s ease-out}
-.ad-price b .trend{font-size:10px;margin-left:5px;vertical-align:middle;opacity:.9}
-.trend.up{color:var(--green)}
-.trend.down{color:var(--red)}
-.ad-price span,.ad-avail span,.ad-limits span{font-size:10.5px;color:var(--muted);font-weight:500;display:block;margin-top:3px;letter-spacing:.1px}
-.ad-avail b,.ad-limits b{font-size:13.5px;font-weight:600;display:block;font-variant-numeric:tabular-nums;letter-spacing:-.2px}
-.ad-methods{display:flex;gap:5px;flex-wrap:wrap}
-.chip{background:rgba(255,255,255,.045);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:10.5px;color:#b8c5d6;white-space:nowrap;font-weight:500;transition:.15s}
-.chip:hover{border-color:var(--border-hi);transform:translateY(-1px)}
-[data-theme="light"] .chip{background:rgba(0,0,0,.04);color:#4d5c6e}
-.chip.whale{border-color:rgba(91,157,255,.4);color:var(--blue)}
-
-/* ============ BUTTONS ============ */
-.btn{border-radius:11px;padding:11px 20px;font-weight:600;font-size:12.5px;letter-spacing:.15px;transition:all .22s var(--smooth);white-space:nowrap;position:relative;overflow:hidden;isolation:isolate}
-.btn .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.35);transform:scale(0);animation:ripple .65s ease-out;pointer-events:none;z-index:0}
-.btn>*{position:relative;z-index:1}
-.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);transform:translateX(-100%);transition:transform .7s;pointer-events:none;z-index:0}
-.btn:hover::after{transform:translateX(100%)}
-.btn.green{background:linear-gradient(180deg,#13f099,#0aca76);color:#031a10;box-shadow:0 4px 16px -4px var(--green-glow),inset 0 1px 0 rgba(255,255,255,.3)}
-.btn.green:hover{filter:brightness(1.08);box-shadow:0 8px 24px -4px rgba(16,232,138,.7),inset 0 1px 0 rgba(255,255,255,.35);transform:translateY(-2px)}
-.btn.green:active{transform:translateY(0) scale(.98);filter:brightness(.98)}
-.btn.red{background:linear-gradient(180deg,#ff5e7c,#e63954);color:#fff;box-shadow:0 4px 16px -4px rgba(255,77,109,.5),inset 0 1px 0 rgba(255,255,255,.22)}
-.btn.red:hover{filter:brightness(1.08);box-shadow:0 8px 24px -4px rgba(255,77,109,.65);transform:translateY(-2px)}
-.btn.red:active{transform:translateY(0) scale(.98);filter:brightness(.98)}
-.btn.ghost{background:rgba(255,255,255,.045);border:1px solid var(--border-hi);color:var(--text)}
-[data-theme="light"] .btn.ghost{background:rgba(0,0,0,.03)}
-.btn.ghost:hover{background:rgba(255,255,255,.085);border-color:rgba(255,255,255,.2);transform:translateY(-1px)}
-.btn.ghost:active{transform:translateY(0) scale(.98)}
-.btn.yellow{background:linear-gradient(180deg,#ffd84a,#ffb020);color:#1a1200;box-shadow:0 4px 16px -4px rgba(255,210,63,.5),inset 0 1px 0 rgba(255,255,255,.35)}
-.btn.yellow:hover{filter:brightness(1.06);transform:translateY(-1px)}
-.btn:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.5);transform:none!important;box-shadow:none!important}
-.btn:disabled::after,.btn:disabled .ripple{display:none}
-.btn.full{width:100%}
-.btn.sm{padding:8px 14px;font-size:11.5px;border-radius:9px}
-.btn.sm::after{display:none}
-
-/* ============ CARD ============ */
-.card{background:linear-gradient(180deg,rgba(255,255,255,.032),rgba(255,255,255,.006));border:1px solid var(--border);border-radius:18px;padding:22px;animation:adIn .4s var(--out)}
-[data-theme="light"] .card{background:linear-gradient(180deg,#fff,#f7f9fc)}
-.field{margin-bottom:16px}
-.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:7px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
-.field .hint{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.checkline{display:flex;gap:8px;flex-wrap:wrap}
-.checkline label{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.032);border:1px solid var(--border);border-radius:11px;padding:8px 13px;font-size:12.5px;cursor:pointer;transition:all .2s var(--spring);color:#b8c5d6;margin:0}
-.checkline label:hover{border-color:var(--border-hi);background:rgba(255,255,255,.06);transform:translateY(-1px)}
-.checkline input{width:auto;margin:0;accent-color:var(--yellow);cursor:pointer}
-.checkline label.on{border-color:rgba(255,210,63,.5);background:rgba(255,210,63,.08);color:var(--text);box-shadow:0 0 0 3px rgba(255,210,63,.06)}
-
-/* ============ MODAL ============ */
-.backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(circle at 50% 40%,rgba(6,9,14,.75),rgba(2,3,5,.92));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);animation:fade .25s ease}
-[data-theme="light"] .backdrop{background:radial-gradient(circle at 50% 40%,rgba(232,237,242,.75),rgba(200,210,220,.92))}
-.modal{background:linear-gradient(180deg,#131a23,#0d1218);border:1px solid var(--border-hi);border-radius:22px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;padding:26px;animation:pop .4s var(--spring);box-shadow:0 32px 90px -20px rgba(0,0,0,.95),0 0 0 1px rgba(255,255,255,.02) inset,inset 0 1px 0 rgba(255,255,255,.06);position:relative}
-.modal::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,rgba(91,157,255,.6),rgba(155,109,255,.6),transparent)}
-.modal>*{animation:modalChild .4s var(--out) backwards}
-.modal>*:nth-child(1){animation-delay:0s}.modal>*:nth-child(2){animation-delay:.04s}.modal>*:nth-child(3){animation-delay:.08s}.modal>*:nth-child(4){animation-delay:.12s}.modal>*:nth-child(5){animation-delay:.16s}.modal>*:nth-child(6){animation-delay:.2s}.modal>*:nth-child(7){animation-delay:.24s}
-.modal.wide{max-width:580px}
-.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.modal-head h3{font-size:17px;font-weight:700;letter-spacing:-.35px}
-.x{width:32px;height:32px;border-radius:9px;color:var(--muted);font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .25s var(--spring)}
-.x:hover{background:rgba(255,255,255,.08);color:var(--text);transform:rotate(90deg)}
-.seg{display:flex;background:rgba(255,255,255,.028);border:1px solid var(--border);border-radius:11px;padding:3px;position:relative}
-[data-theme="light"] .seg{background:rgba(0,0,0,.03)}
-.seg button{flex:1;padding:8px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--muted);transition:all .22s var(--spring);position:relative;z-index:1}
-.seg button:hover{color:var(--text-dim)}
-.seg button.active{background:linear-gradient(180deg,rgba(255,255,255,.11),rgba(255,255,255,.04));color:var(--text);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 4px 12px -4px rgba(0,0,0,.5)}
-[data-theme="light"] .seg button.active{background:linear-gradient(180deg,#fff,#f0f3f7);box-shadow:0 2px 8px -2px rgba(0,0,0,.1)}
-.summary{background:rgba(255,255,255,.022);border:1px solid var(--border);border-radius:14px;padding:16px;margin:18px 0}
-.summary div{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}
-.summary div span{color:var(--muted)}
-.summary div b{font-variant-numeric:tabular-nums;font-weight:600}
-.summary div.total{border-top:1px solid var(--border);margin-top:8px;padding-top:12px;font-size:15px;font-weight:700}
-.req-block{background:rgba(91,157,255,.055);border:1px solid rgba(91,157,255,.22);border-radius:14px;padding:16px;margin:16px 0;position:relative;overflow:hidden}
-.req-block::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(91,157,255,.4),transparent)}
-.req-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--blue);font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px}
-.req-row{display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,.05)}
-.req-row:last-child{border-bottom:none}
-.req-row span{color:var(--muted)}
-.req-row b{font-variant-numeric:tabular-nums;font-weight:600;letter-spacing:.3px}
-.copy-btn{background:rgba(91,157,255,.14);border:1px solid rgba(91,157,255,.32);color:var(--blue);padding:5px 12px;border-radius:8px;font-size:11px;font-weight:600;transition:all .2s var(--spring)}
-.copy-btn:hover{background:rgba(91,157,255,.24);transform:translateY(-1px)}
-.copy-btn.copied{background:rgba(16,232,138,.2);border-color:rgba(16,232,138,.5);color:var(--green);animation:copyPulse .5s ease-out}
-
-/* ============ STATUS ============ */
-.status{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:20px;font-size:11.5px;font-weight:600;letter-spacing:.1px;position:relative}
-.status::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
-.status.pay,.status.release,.status.merchant_pay{background:rgba(255,210,63,.13);color:var(--yellow)}
-.status.confirm{background:rgba(16,232,138,.15);color:var(--green)}
-.status.confirm::after{content:'';position:absolute;inset:0;border-radius:20px;border:2px solid var(--green);animation:statusPulse 1.8s ease-out infinite;pointer-events:none}
-.status.completed{background:rgba(16,232,138,.13);color:var(--green)}
-.status.cancelled{background:rgba(107,119,133,.14);color:var(--muted)}
-.status.disputed{background:rgba(255,77,109,.14);color:var(--red)}
-
-/* ============ TIMER ============ */
-.timer-bar{background:rgba(255,210,63,.06);border:1px solid rgba(255,210,63,.18);border-radius:12px;padding:11px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:12.5px;transition:all .3s}
-.timer-bar .lbl{color:var(--muted);font-weight:500}
-.timer-bar .time{font-weight:700;font-variant-numeric:tabular-nums;color:var(--yellow);font-size:14px;letter-spacing:.5px;transition:color .3s}
-.timer-bar.urgent{background:rgba(255,77,109,.08);border-color:rgba(255,77,109,.28);animation:pulse 1.4s infinite}
-.timer-bar.urgent .time{color:var(--red)}
-
-/* ============ STEPS ============ */
-.steps{margin:20px 0;display:flex;flex-direction:column;gap:0}
-.step{display:flex;gap:14px;position:relative;padding-bottom:20px}
-.step:last-child{padding-bottom:0}
-.step .dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);font-weight:700;background:var(--panel);z-index:1;transition:all .3s var(--spring)}
-.step.done .dot{background:linear-gradient(135deg,var(--green),var(--green-d));border-color:var(--green);color:#04120c;box-shadow:0 0 14px rgba(16,232,138,.45);animation:checkPop .4s var(--spring)}
-.step.active .dot{border-color:var(--yellow);color:var(--yellow);animation:pulse 1.8s infinite;box-shadow:0 0 12px rgba(255,210,63,.35)}
-.step .txt{padding-top:2px;font-size:13px;color:var(--muted);font-weight:500;transition:color .3s}
-.step.done .txt{color:var(--text)}
-.step.active .txt{color:var(--yellow);font-weight:600}
-.step::before{content:'';position:absolute;left:11px;top:24px;bottom:0;width:2px;background:var(--border);transition:background .4s}
-.step:last-child::before{display:none}
-.step.done::before{background:linear-gradient(180deg,var(--green),var(--border))}
-
-/* ============ CHAT ============ */
-.chat{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:10px}
-.chat-log{max-height:240px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth}
-.msg{max-width:82%;padding:9px 13px;border-radius:14px;font-size:12.8px;line-height:1.45;word-wrap:break-word;animation:msgIn .3s var(--spring)}
-.msg.them{background:rgba(255,255,255,.05);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:5px}
-[data-theme="light"] .msg.them{background:#eef2f7}
-.msg.me{background:linear-gradient(135deg,var(--green),var(--green-d));color:#04120c;font-weight:500;align-self:flex-end;border-bottom-right-radius:5px;box-shadow:0 4px 14px -4px rgba(16,232,138,.4)}
-.msg.system{background:transparent;color:var(--muted);font-size:11.5px;align-self:center;text-align:center;max-width:100%;font-style:italic;line-height:1.5}
-.msg.system .help-ico{color:var(--blue);font-style:normal;margin-right:5px}
-.chat-input{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
-.chat-input input{padding:9px 12px;font-size:13px;border-radius:10px}
-.chat-input button{width:40px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--border-hi);font-size:15px;transition:all .2s var(--spring)}
-.chat-input button:hover{background:rgba(91,157,255,.15);border-color:rgba(91,157,255,.4);color:var(--blue);transform:scale(1.08) rotate(-8deg)}
-.chat-input button:active{transform:scale(.95)}
-.quick-replies{display:flex;gap:6px;padding:0 10px 10px;flex-wrap:wrap}
-.qr{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:11.5px;color:#b8c5d6;font-weight:500;transition:all .2s var(--spring)}
-.qr:hover{border-color:rgba(91,157,255,.5);color:var(--blue);background:rgba(91,157,255,.08);transform:translateY(-2px)}
-.qr:active{transform:translateY(0) scale(.96)}
-
-/* ============ ORDER ROW ============ */
-.order-row{display:flex;align-items:center;gap:16px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.005));border:1px solid var(--border);border-radius:16px;padding:15px 20px;transition:all .25s var(--spring);cursor:pointer;flex-wrap:wrap;position:relative;animation:adIn .35s var(--out) backwards}
-.order-row:nth-child(1){animation-delay:0s}.order-row:nth-child(2){animation-delay:.04s}.order-row:nth-child(3){animation-delay:.08s}.order-row:nth-child(4){animation-delay:.12s}.order-row:nth-child(5){animation-delay:.16s}
-.order-row:hover{border-color:var(--border-hi);transform:translateY(-2px);box-shadow:0 12px 32px -10px rgba(0,0,0,.8)}
-.order-row.needs{border-color:rgba(16,232,138,.42);box-shadow:0 0 0 1px rgba(16,232,138,.14) inset,0 0 32px -10px rgba(16,232,138,.35);animation:pulseGlow 2s infinite,adIn .35s var(--out) backwards}
-.order-row .unread{position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,var(--red),#ff2d55);color:#fff;font-size:10px;font-weight:700;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 6px;box-shadow:0 0 12px rgba(255,77,109,.55),0 0 0 2px rgba(5,7,10,.9);animation:badgeBounce .4s var(--spring)}
-.order-type{font-weight:700;font-size:11px;width:88px;letter-spacing:.6px}
-.order-type.buy{color:var(--green)}
-.order-type.sell{color:var(--red)}
-.order-info{flex:1;min-width:180px}
-.order-info .big{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.2px}
-.order-info .sub{font-size:11.5px;color:var(--muted);margin-top:3px}
-.order-rub{font-weight:700;font-variant-numeric:tabular-nums;font-size:14px}
-
-/* ============ EMPTY / SKELETON ============ */
-.empty{text-align:center;padding:70px 20px;color:var(--muted);position:relative;animation:fade .4s ease}
-.empty::before{content:'';position:absolute;top:20px;left:50%;transform:translateX(-50%);width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(91,157,255,.15),transparent 70%);pointer-events:none;z-index:0;animation:pulse 4s infinite}
-.empty .ico{font-size:52px;margin-bottom:16px;opacity:.5;position:relative;z-index:1;animation:float 3s ease-in-out infinite}
-.empty>div:last-child,.empty>span{position:relative;z-index:1}
-.skeleton{background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:12px}
-
-/* ============ PROFILE ============ */
-.profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:24px}
-.stat-card{background:linear-gradient(180deg,rgba(255,255,255,.038),rgba(255,255,255,.006));border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .25s var(--spring);animation:adIn .4s var(--out) backwards}
-.stat-card:nth-child(1){animation-delay:0s}.stat-card:nth-child(2){animation-delay:.04s}.stat-card:nth-child(3){animation-delay:.08s}.stat-card:nth-child(4){animation-delay:.12s}
-.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent)}
-.stat-card:hover{border-color:var(--border-hi);transform:translateY(-3px);box-shadow:0 16px 40px -14px rgba(0,0,0,.8)}
-.stat-card .lbl{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1.1px;margin-bottom:8px;font-weight:600}
-.stat-card .val{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.6px}
-.stat-card .val.green{color:var(--green)}
-.stat-card .val.yellow{color:var(--yellow)}
-.stat-card .val.red{color:var(--red)}
-.mission-card{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.022);border:1px solid var(--border);border-radius:13px;padding:14px 18px;margin-bottom:10px;transition:all .25s var(--spring);animation:adIn .4s var(--out) backwards}
-.mission-card:nth-child(1){animation-delay:0s}.mission-card:nth-child(2){animation-delay:.03s}.mission-card:nth-child(3){animation-delay:.06s}.mission-card:nth-child(4){animation-delay:.09s}.mission-card:nth-child(5){animation-delay:.12s}
-.mission-card:hover{transform:translateX(2px);border-color:var(--border-hi)}
-.mission-card.done{background:linear-gradient(135deg,rgba(16,232,138,.08),rgba(16,232,138,.02));border-color:rgba(16,232,138,.28)}
-.mission-card .check{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;transition:all .3s var(--spring)}
-.mission-card.done .check{background:linear-gradient(135deg,var(--green),var(--green-d));border-color:var(--green);color:#04120c;font-weight:900;box-shadow:0 0 16px rgba(16,232,138,.4);animation:checkPop .5s var(--spring)}
-.mission-card .m-info{flex:1}
-.mission-card .m-name{font-size:13px;font-weight:600}
-.mission-card .m-desc{font-size:11.5px;color:var(--muted);margin-top:3px}
-.mission-card.done .m-name{color:var(--green)}
-.review-item{background:rgba(255,255,255,.022);border:1px solid var(--border);border-radius:12px;padding:13px 15px;margin-bottom:9px;transition:all .2s var(--spring)}
-.review-item[data-action]:hover{border-color:var(--border-hi);background:rgba(255,255,255,.04);transform:translateX(2px)}
-.review-head{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
-.review-stars{color:var(--yellow);letter-spacing:1px}
-.review-text{font-size:13px;color:var(--text);line-height:1.5}
-.review-time{font-size:10.5px;color:var(--muted);margin-top:5px}
-.stars-input{display:flex;gap:8px;justify-content:center;font-size:28px;margin-bottom:14px}
-.stars-input span{cursor:pointer;transition:all .25s var(--spring);opacity:.3;filter:grayscale(.7)}
-.stars-input span:hover{transform:scale(1.2) rotate(-8deg);opacity:.85;filter:none}
-.stars-input span.on{opacity:1;filter:none;text-shadow:0 0 20px rgba(255,210,63,.7);transform:scale(1.08)}
-.setting-row{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.005));border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:10px;gap:14px;transition:all .2s var(--spring);animation:adIn .4s var(--out) backwards}
-.setting-row:nth-child(1){animation-delay:0s}.setting-row:nth-child(2){animation-delay:.03s}.setting-row:nth-child(3){animation-delay:.06s}.setting-row:nth-child(4){animation-delay:.09s}.setting-row:nth-child(5){animation-delay:.12s}.setting-row:nth-child(6){animation-delay:.15s}.setting-row:nth-child(7){animation-delay:.18s}
-.setting-row:hover{border-color:var(--border-hi);transform:translateX(2px)}
-.setting-row .info{font-size:13.5px;font-weight:500}
-.setting-row .info small{display:block;color:var(--muted);font-size:11.5px;margin-top:3px;font-weight:400}
-.switch{width:46px;height:26px;border-radius:13px;background:rgba(255,255,255,.06);border:1px solid var(--border);position:relative;cursor:pointer;transition:all .3s var(--spring);flex-shrink:0}
-[data-theme="light"] .switch{background:rgba(0,0,0,.08)}
-.switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:all .3s var(--spring)}
-.switch.on{background:linear-gradient(135deg,var(--green),var(--green-d));border-color:var(--green);box-shadow:0 0 18px -2px var(--green-glow)}
-.switch.on::after{left:22px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
-.slider{width:120px;accent-color:var(--green);cursor:pointer;height:6px}
-.streak-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(255,120,60,.15),rgba(255,60,120,.1));border:1px solid rgba(255,120,60,.3);color:#ff9955;padding:4px 12px;border-radius:20px;font-size:11.5px;font-weight:600;animation:float 3s ease-in-out infinite}
-.pinpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
-.pinpad button{padding:16px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--border);font-size:18px;font-weight:700;transition:all .15s var(--spring)}
-.pinpad button:hover{background:rgba(255,255,255,.1);border-color:var(--border-hi);transform:scale(1.05)}
-.pinpad button:active{transform:scale(.95)}
-[data-theme="light"] .pinpad button{background:rgba(0,0,0,.04)}
-.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:8px}
-.pin-dots span{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid var(--border);transition:all .2s var(--spring)}
-.pin-dots span.on{background:var(--green);box-shadow:0 0 14px var(--green-glow);transform:scale(1.15)}
-
-/* ============ TOASTS ============ */
-#toasts{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none}
-.toast{background:linear-gradient(180deg,rgba(30,42,54,.98),rgba(20,28,38,.98));border:1px solid var(--border-hi);border-left:3px solid var(--yellow);padding:13px 22px;border-radius:13px;font-size:13px;font-weight:500;box-shadow:0 16px 44px -10px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.06);animation:slide .4s var(--spring);max-width:90vw;backdrop-filter:blur(20px);pointer-events:auto;position:relative;overflow:hidden}
-.toast::after{content:'';position:absolute;bottom:0;left:0;height:2px;background:var(--yellow);animation:toastProgress 2.8s linear forwards}
-.toast.ok{border-left-color:var(--green);box-shadow:0 16px 44px -10px rgba(0,0,0,.9),0 0 32px -10px rgba(16,232,138,.45)}
-.toast.ok::after{background:var(--green)}
-.toast.err{border-left-color:var(--red);box-shadow:0 16px 44px -10px rgba(0,0,0,.9),0 0 32px -10px rgba(255,77,109,.45)}
-.toast.err::after{background:var(--red)}
-.toast.sms{background:linear-gradient(180deg,#1a2634,#0f1822);border-left-color:var(--blue);font-family:'SF Mono',Consolas,monospace;font-size:12.5px;box-shadow:0 16px 44px -10px rgba(0,0,0,.9),0 0 32px -10px rgba(91,157,255,.5)}
-[data-theme="light"] .toast.sms{background:linear-gradient(180deg,#e8f0fa,#dae5f2);color:#141b25}
-.toast.sms::after{background:var(--blue)}
-
-/* ============ MOBILE NAV ============ */
-.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(8,11,15,.94);backdrop-filter:blur(24px) saturate(1.5);border-top:1px solid var(--border);padding:8px 0 14px;z-index:60;justify-content:space-around;transition:background .3s}
-.mobile-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;padding:6px;color:var(--muted);font-weight:600;position:relative;transition:all .25s var(--spring)}
-.mobile-nav button span:first-child{font-size:18px;transition:transform .3s var(--spring)}
-.mobile-nav button.active{color:var(--text)}
-.mobile-nav button.active span:first-child{transform:scale(1.2) translateY(-2px)}
-.mobile-nav button:active span:first-child{transform:scale(.9)}
-.mobile-nav button .badge{position:absolute;top:0;right:calc(50% - 22px);background:var(--red);color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;animation:badgeBounce .4s var(--spring)}
-
-/* ============ ONBOARDING ============ */
-.onboard-overlay{position:fixed;inset:0;z-index:400;background:radial-gradient(circle at 50% 30%,rgba(6,9,14,.85),rgba(2,3,5,.96));backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fade .4s ease}
-.onboard-card{max-width:460px;text-align:center;padding:36px;background:linear-gradient(180deg,#131a23,#0d1218);border:1px solid var(--border-hi);border-radius:24px;box-shadow:0 32px 90px -20px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.06);position:relative;animation:pop .5s var(--spring)}
-.onboard-card::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(91,157,255,.6),rgba(155,109,255,.6),transparent)}
-.onboard-icon{font-size:56px;margin-bottom:18px;filter:drop-shadow(0 8px 24px rgba(91,157,255,.4));animation:float 3s ease-in-out infinite}
-.onboard-card h3{font-size:21px;font-weight:800;margin-bottom:14px;letter-spacing:-.4px}
-.onboard-card p{font-size:14px;color:var(--text-dim);line-height:1.65;margin-bottom:26px}
-.onboard-dots{display:flex;gap:6px;justify-content:center;margin-bottom:26px}
-.onboard-dots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .4s var(--spring)}
-.onboard-dots span.active{background:var(--green);width:26px;border-radius:4px;box-shadow:0 0 14px var(--green-glow)}
-.onboard-actions{display:flex;gap:10px}
-
-/* ============ CONFETTI ============ */
-.confetti{position:fixed;width:10px;height:10px;z-index:9999;pointer-events:none;animation:fall 2.5s ease-out forwards}
-
-/* ============ PAGINATION ============ */
-.pagination{display:flex;justify-content:center;gap:8px;margin-top:20px;animation:fade .4s ease}
-.pagination button{padding:8px 14px;border-radius:9px;background:rgba(255,255,255,.05);border:1px solid var(--border);font-size:12px;font-weight:600;transition:all .2s var(--spring);color:var(--text-dim)}
-.pagination button:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:var(--border-hi);transform:translateY(-1px)}
-.pagination button.active{background:linear-gradient(180deg,rgba(91,157,255,.25),rgba(91,157,255,.1));border-color:rgba(91,157,255,.5);color:var(--blue);transform:scale(1.05)}
-.pagination button:disabled{opacity:.3;cursor:not-allowed}
-
-/* ============ RESPONSIVE ============ */
-@media(max-width:860px){
-  .ad{grid-template-columns:1fr 1fr;gap:12px}
-  .ad-user{grid-column:1/-1}
-  .ad-methods{grid-column:1/-1}
-  .ad .btn{grid-column:1/-1}
-  .wallet{margin-left:0;width:100%}
-  .bal{flex:1;min-width:0}
-  main{padding:18px 16px 40px}
-  .topbar{padding:12px 16px;gap:12px}
-  .spark-container{display:none}
-}
-@media(max-width:720px){
-  .tabs{display:none}
-  .mobile-nav{display:flex}
-  main{padding-bottom:100px}
-  .topbar{gap:10px}
-  .filters .rate,.spread-pill{margin-left:0}
-  .section-title h2{font-size:17px}
-  .modal{padding:20px}
-  .modal-head h3{font-size:16px}
-  .profile-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
-  .stat-card .val{font-size:20px}
-}
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-}
-</style>
-</head>
-<body>
-<div id="grain"></div>
-
-<header class="topbar">
-  <div class="logo">P2P<span>Sim</span></div>
-  <nav class="tabs" id="tabs">
-    <button data-tab="buy" class="active">Купить</button>
-    <button data-tab="sell">Продать</button>
-    <button data-tab="myads">Объявления</button>
-    <button data-tab="orders">Сделки</button>
-    <button data-tab="profile">Профиль</button>
-  </nav>
-  <div class="spark-container">
-    <div class="spark-info">Курс: <b id="sparkPrice">—</b></div>
-    <div id="sparkChart"></div>
-  </div>
-  <button class="icon-btn" data-action="open-notifications" title="Уведомления (Ctrl+N)">🔔<span class="bell-badge hide" id="bellBadge"></span></button>
-  <button class="icon-btn" data-action="toggle-theme" id="themeBtn" title="Тема">🌙</button>
-  <div class="wallet">
-    <div class="bal"><span>Баланс RUB</span><b id="balRub" data-action="toggle-hide">0</b></div>
-    <div class="bal"><span>Баланс USDT</span><b id="balUsdt" data-action="toggle-hide">0</b></div>
-  </div>
-</header>
-
-<main>
-  <section id="view-buy"></section>
-  <section id="view-sell"></section>
-  <section id="view-myads"></section>
-  <section id="view-orders"></section>
-  <section id="view-profile"></section>
-</main>
-
-<nav class="mobile-nav" id="mobileNav">
-  <button data-tab="buy" class="active"><span>🛒</span><span>Купить</span></button>
-  <button data-tab="sell"><span>💰</span><span>Продать</span></button>
-  <button data-tab="myads"><span>📄</span><span>Объявл.</span></button>
-  <button data-tab="orders"><span>📊</span><span>Сделки</span></button>
-  <button data-tab="profile"><span>👤</span><span>Профиль</span></button>
-</nav>
-
-<div id="modalRoot"></div>
-<div id="toasts"></div>
-
-<script>
-/* ============ UTILS ============ */
-const $  = (s, r = document) => r.querySelector(s);
-const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const n2 = n => n.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const rubF = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
-const usdF = n => n2(n) + ' USDT';
-const rnd = (a, b) => a + Math.random() * (b - a);
-const pick = arr => arr[Math.floor(Math.random() * arr.length)];
-const pickN = (arr, n) => { const c = [...arr], out = []; while (out.length < n && c.length) out.push(c.splice(Math.floor(Math.random()*c.length),1)[0]); return out; };
-const nowTime = () => new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const fmtLeft = ms => { if (ms <= 0) return '00:00'; const m = Math.floor(ms/60000), s = Math.floor((ms%60000)/1000); return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; };
-const timeAgo = ts => { const s = Math.floor((Date.now() - ts) / 1000); if (s < 60) return 'только что'; if (s < 3600) return Math.floor(s/60) + ' мин назад'; if (s < 86400) return Math.floor(s/3600) + ' ч назад'; return Math.floor(s/86400) + ' дн назад'; };
-
-/* ============ ANIMATIONS ============ */
-function animateNumber(el, from, to, duration = 650, formatter = null) {
-  if (!el) return;
-  const start = performance.now();
-  const fmt = formatter || (v => v);
-  function frame(now) {
-    const t = Math.min((now - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - t, 3);
-    const value = from + (to - from) * eased;
-    el.textContent = fmt(value);
-    if (t < 1) requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-}
-
-function addRipple(e) {
-  const btn = e.currentTarget;
-  if (!btn || btn.disabled) return;
-  const rect = btn.getBoundingClientRect();
-  const size = Math.max(rect.width, rect.height) * 1.2;
-  const x = e.clientX - rect.left - size / 2;
-  const y = e.clientY - rect.top - size / 2;
-  const ripple = document.createElement('span');
-  ripple.className = 'ripple';
-  ripple.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px;`;
-  btn.appendChild(ripple);
-  setTimeout(() => ripple.remove(), 700);
-}
-
-function flashPrice(el, dir) {
-  if (!el) return;
-  el.classList.remove('flash-up', 'flash-down');
-  void el.offsetWidth;
-  el.classList.add(dir === 'up' ? 'flash-up' : 'flash-down');
-  setTimeout(() => { el.classList.remove('flash-up', 'flash-down'); }, 900);
-}
-
-/* ============ CONSTANTS ============ */
-const METHODS = ['Нео Банк', 'Астра Финанс', 'Орбита Пэй', 'Квант Банк', 'Феникс Банк', 'Вектор Финанс', 'Гелиос Пэй'];
-const BANKS_SMS = ['НеоБанк', 'АстраФинанс', 'ОрбитаПэй', 'КвантБанк', 'ФениксБанк', 'ВекторФинанс'];
-const NAMES = ['CryptoWhale','Иван_М','FastTrade','Анна_К','Обменник24','BTC_Master','Елена_С','Dmitry_T','SafeDeal','Мария_В','ТрейдерПро','Novikov','P2P_King','Алексей_Р'];
-const SAVE_KEY = 'p2p_sim_v9';
-const SAVE_VERSION = 9;
-const ORDER_TTL = 15 * 60 * 1000;
-const DISPUTE_GRACE = 3 * 60 * 1000;
-const LARGE_ORDER_THRESHOLD = 30000;
-const PAGE_SIZE = 8;
-
-const ORDER_TRANSITIONS = {
-  pay: ['release', 'cancelled'], release: ['completed', 'disputed'],
-  merchant_pay: ['confirm', 'cancelled'], confirm: ['completed', 'disputed'],
-  completed: [], cancelled: [], disputed: ['completed', 'cancelled'],
-};
-const MISSIONS = [
-  { id: 'first_trade', name: 'Первая сделка', desc: 'Завершите первую сделку' },
-  { id: 'profit_500', name: 'Навар 500 ₽', desc: 'Заработайте 500 ₽ на спреде' },
-  { id: 'five_no_dispute', name: 'Чистые пять', desc: 'Завершите 5 сделок без споров' },
-  { id: 'three_reviews', name: 'Критик', desc: 'Оставьте 3 отзыва' },
-  { id: 'first_ad', name: 'Мерчант', desc: 'Опубликуйте первое объявление' },
-];
-const ONBOARD_STEPS = [
-  { icon: '👋', title: 'Добро пожаловать в P2P Sim', text: 'Это симулятор P2P-торговли криптовалютой. Покупайте и продавайте USDT с ботами-мерчантами, как на настоящей бирже. Горячие клавиши: 1-5 — табы, Esc — закрыть, Ctrl+K — поиск.' },
-  { icon: '🛒', title: 'Как купить USDT', text: 'На вкладке «Купить» выберите объявление, укажите сумму и оплатите по реквизитам, которые появятся в сделке. Затем нажмите «Я оплатил» — продавец подтвердит и USDT придут на баланс.' },
-  { icon: '💰', title: 'Как продать', text: 'Создайте объявление во вкладке «Объявления». USDT блокируются в эскроу до подтверждения получения денег. Покупатели сами найдут вас.' },
-];
-
-let AD_ID = 1, ORDER_ID = 1;
-let saveTimer = null;
-let lastRenderedRub = 0, lastRenderedUsdt = 0;
-
-/* ============ STATE ============ */
-const state = {
-  tab: 'buy', rub: 100000, usdt: 500, ads: [], myAds: [], orders: [],
-  filter: { method: 'all', amount: '', sort: 'price', search: '', onlineOnly: false, favOnly: false },
-  ordersFilter: 'all', ordersPage: 1, openOrderId: null,
-  hiddenBalance: false, sound: true, volume: 0.7, theme: 'dark',
-  stats: { completed: 0, volumeRub: 0, rating: 5.0, ratingsCount: 0 },
-  missions: {}, reviews: {}, notifications: [], onboarded: false,
-  totalCreated: 0, totalCancelled: 0, buyHistory: [],
-  favorites: [], priceAlerts: [], priceHistory: [], marketEvent: null,
-  streak: { days: 0, lastVisit: null },
-  firstTradeCelebrated: false, smsSim: true,
-};
-
-/* ============ SAVE / LOAD ============ */
-function save() {
-  try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify({
-      _v: SAVE_VERSION, rub: state.rub, usdt: state.usdt,
-      myAds: state.myAds, orders: state.orders, stats: state.stats,
-      sound: state.sound, hiddenBalance: state.hiddenBalance, volume: state.volume, theme: state.theme,
-      missions: state.missions, reviews: state.reviews, notifications: state.notifications,
-      onboarded: state.onboarded, totalCreated: state.totalCreated, totalCancelled: state.totalCancelled,
-      buyHistory: state.buyHistory, favorites: state.favorites, priceAlerts: state.priceAlerts,
-      priceHistory: state.priceHistory.slice(-50), streak: state.streak,
-      firstTradeCelebrated: state.firstTradeCelebrated, smsSim: state.smsSim,
-    }));
-  } catch(e) {}
-}
-function saveSoon() { clearTimeout(saveTimer); saveTimer = setTimeout(save, 400); }
-
-function migrate(d) {
-  if (!d || typeof d !== 'object') return null;
-  ['orders','myAds','notifications','buyHistory','favorites','priceAlerts','priceHistory'].forEach(k => { if (!Array.isArray(d[k])) d[k] = []; });
-  if (!d.missions || typeof d.missions !== 'object') d.missions = {};
-  if (!d.reviews || typeof d.reviews !== 'object') d.reviews = {};
-  if (typeof d.onboarded !== 'boolean') d.onboarded = false;
-  if (typeof d.volume !== 'number') d.volume = 0.7;
-  if (typeof d.theme !== 'string') d.theme = 'dark';
-  if (!d.streak || typeof d.streak !== 'object') d.streak = { days: 0, lastVisit: null };
-  if (typeof d.firstTradeCelebrated !== 'boolean') d.firstTradeCelebrated = false;
-  if (typeof d.smsSim !== 'boolean') d.smsSim = true;
-  delete d.kyc;
-  if (d.missions.kyc_standard) delete d.missions.kyc_standard;
-  for (const o of d.orders) {
-    if (o.merchant && !o.merchant.req) o.merchant.req = genRequisites();
-    if (o.merchant && typeof o.merchant.isBad !== 'boolean') o.merchant.isBad = false;
-    if (o.merchant && typeof o.merchant.fraudType !== 'string') o.merchant.fraudType = null;
-    if (!Array.isArray(o.messages)) o.messages = [];
-  }
-  for (const a of d.myAds) {
-    if (typeof a.originalAmount !== 'number') a.originalAmount = a.amount;
-    if (!a.merchant.req) a.merchant.req = genRequisites();
-    if (typeof a.createdAt !== 'number') a.createdAt = Date.now();
-  }
-  return d;
-}
-
-function load() {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return false;
-    const d = migrate(JSON.parse(raw));
-    if (!d) return false;
-    Object.assign(state, {
-      rub: typeof d.rub === 'number' ? d.rub : state.rub,
-      usdt: typeof d.usdt === 'number' ? d.usdt : state.usdt,
-      myAds: d.myAds, orders: d.orders, stats: d.stats || state.stats,
-      sound: d.sound ?? true, hiddenBalance: d.hiddenBalance ?? false,
-      volume: d.volume, theme: d.theme, missions: d.missions, reviews: d.reviews,
-      notifications: d.notifications, onboarded: d.onboarded,
-      totalCreated: d.totalCreated, totalCancelled: d.totalCancelled,
-      buyHistory: d.buyHistory, favorites: d.favorites, priceAlerts: d.priceAlerts,
-      priceHistory: d.priceHistory, streak: d.streak,
-      firstTradeCelebrated: d.firstTradeCelebrated, smsSim: d.smsSim,
-    });
-    AD_ID = Math.max(1, ...state.myAds.map(a => a.id || 0), ...state.ads.map(a => a.id || 0)) + 1;
-    ORDER_ID = Math.max(1, ...state.orders.map(o => parseInt(String(o.id).replace(/\D/g,'')) || 0)) + 1;
-    lastRenderedRub = state.rub;
-    lastRenderedUsdt = state.usdt;
-    return true;
-  } catch(e) { return false; }
-}
-
-/* ============ SOUND ============ */
-let audioCtx = null;
-function beep(freq = 660, dur = 0.12, vol = 0.06) {
-  if (!state.sound) return;
-  try {
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = 'sine'; o.frequency.value = freq;
-    const av = vol * state.volume;
-    g.gain.setValueAtTime(av, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-    o.connect(g).connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + dur);
-  } catch(e) {}
-}
-
-/* ============ MERCHANT ============ */
-function genRequisites() {
-  return {
-    card: `${pick(['4276','4816','5536','2202','2200'])} ${Math.floor(rnd(1000,9999))} ${Math.floor(rnd(1000,9999))} ${Math.floor(rnd(1000,9999))}`,
-    phone: `+7 (${pick(['999','916','985','903','926'])}) ${Math.floor(rnd(100,999))}-${Math.floor(rnd(10,99))}-${Math.floor(rnd(10,99))}`,
-    account: `40817 810 ${pick([1,2,3,4,5,6,7,8,9])} ${Math.floor(rnd(1000000000,9999999999))}`,
-  };
-}
-function makeMerchant(name) {
-  const isBad = Math.random() < 0.15;
-  return {
-    name, rating: +rnd(4.55, 5.0).toFixed(2), trades: Math.floor(rnd(40, 6200)),
-    verified: Math.random() < 0.75, online: Math.random() < 0.7,
-    isBad, fraudType: isBad ? pick(['silent', 'cancel_request', 'wrong_req', 'fake_sms']) : null,
-    req: genRequisites(),
-  };
-}
-
-/* ============ STATE MACHINE ============ */
-function setOrderStatus(order, newStatus) {
-  if (!ORDER_TRANSITIONS[order.status]?.includes(newStatus)) { console.warn('Invalid', order.status, '→', newStatus); return false; }
-  order.status = newStatus;
-  return true;
-}
-
-/* ============ MISSIONS ============ */
-function checkMissions() {
-  const profit = calculateTotalProfit();
-  const noDisputes = !state.orders.some(o => o.status === 'disputed');
-  const reviewsCount = Object.values(state.reviews).flat().length;
-  const checks = {
-    first_trade: state.stats.completed >= 1, profit_500: profit >= 500,
-    five_no_dispute: state.stats.completed >= 5 && noDisputes,
-    three_reviews: reviewsCount >= 3, first_ad: state.myAds.length > 0,
-  };
-  for (const m of MISSIONS) {
-    if (!state.missions[m.id] && checks[m.id]) {
-      state.missions[m.id] = true;
-      notify(`🏆 Достижение: ${m.name}`);
-      toast(`🏆 ${m.name}`, 'ok');
-      beep(1200, 0.18, 0.07);
-    }
-  }
-}
-
-/* ============ NOTIFICATIONS ============ */
-function notify(text, orderId = null) {
-  state.notifications.unshift({ id: Date.now() + Math.random(), text, time: nowTime(), ts: Date.now(), read: false, orderId });
-  if (state.notifications.length > 50) state.notifications.length = 50;
-  renderBell();
-  saveSoon();
-}
-function renderBell() {
-  const unread = state.notifications.filter(n => !n.read).length;
-  const badge = $('#bellBadge');
-  if (!badge) return;
-  if (unread > 0) { badge.textContent = unread > 9 ? '9+' : unread; badge.classList.remove('hide'); }
-  else badge.classList.add('hide');
-}
-
-/* ============ PRICE ============ */
-function getAvgMarketPrice() {
-  const sells = state.ads.filter(a => a.type === 'sell');
-  if (!sells.length) return 0;
-  return sells.reduce((s, a) => s + a.price, 0) / sells.length;
-}
-function getAvgBuyPrice() {
-  if (!state.buyHistory.length) return 0;
-  const total = state.buyHistory.reduce((s, b) => s + b.amount, 0);
-  return total > 0 ? state.buyHistory.reduce((s, b) => s + b.amount * b.price, 0) / total : 0;
-}
-function getPortfolio() {
-  const avg = getAvgBuyPrice();
-  const current = getAvgMarketPrice();
-  const costBasis = state.usdt * avg;
-  const value = state.usdt * current;
-  return { avg, current, costBasis, value, pnl: value - costBasis, pnlPct: avg ? ((current - avg) / avg) * 100 : 0 };
-}
-function calculateTotalProfit() { return getPortfolio().pnl; }
-function getSpread() {
-  const sells = state.ads.filter(a => a.type === 'sell').map(a => a.price);
-  const buys = state.ads.filter(a => a.type === 'buy').map(a => a.price);
-  if (!sells.length || !buys.length) return null;
-  const bestSell = Math.min(...sells), bestBuy = Math.max(...buys);
-  return { bestSell, bestBuy, spread: bestSell - bestBuy, pct: bestBuy ? ((bestSell - bestBuy) / bestBuy) * 100 : 0 };
-}
-function getArbitrage() {
-  const sells = state.ads.filter(a => a.type === 'sell').sort((a,b) => a.price - b.price);
-  const buys = state.ads.filter(a => a.type === 'buy').sort((a,b) => b.price - a.price);
-  if (!sells.length || !buys.length) return null;
-  const profit = buys[0].price - sells[0].price;
-  if (profit <= 0.1) return null;
-  return { buy: sells[0], sell: buys[0], profit };
-}
-function pushPriceHistory() {
-  const p = getAvgMarketPrice();
-  if (!p) return;
-  state.priceHistory.push({ t: Date.now(), p });
-  if (state.priceHistory.length > 60) state.priceHistory.shift();
-}
-function renderSparkline() {
-  const host = $('#sparkChart'), priceEl = $('#sparkPrice');
-  if (!host || !priceEl) return;
-  const hist = state.priceHistory;
-  if (hist.length < 2) { priceEl.textContent = '—'; host.innerHTML = '<div class="skeleton" style="width:110px;height:32px"></div>'; return; }
-  const prices = hist.map(h => h.p);
-  const min = Math.min(...prices), max = Math.max(...prices);
-  const range = max - min || 1;
-  const W = 110, H = 32;
-  const points = prices.map((p, i) => `${(i / (prices.length - 1)) * W},${H - ((p - min) / range) * (H - 4) - 2}`).join(' ');
-  const up = prices[prices.length-1] >= prices[0];
-  const color = up ? 'var(--green)' : 'var(--red)';
-  const last = prices[prices.length-1];
-  priceEl.textContent = n2(last) + ' ₽';
-  priceEl.style.color = up ? 'var(--green)' : 'var(--red)';
-  host.innerHTML = `<svg width="${W}" height="${H}" style="display:block"><polyline fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="${points}"/></svg>`;
-}
-function checkPriceAlerts() {
-  const p = getAvgMarketPrice();
-  if (!p) return;
-  state.priceAlerts = state.priceAlerts.filter(a => {
-    if ((a.direction === 'below' && p <= a.price) || (a.direction === 'above' && p >= a.price)) {
-      notify(`💰 Курс ${a.direction === 'below' ? 'опустился до' : 'поднялся до'} ${n2(p)} ₽`);
-      toast(`💰 Алерт: курс ${n2(p)} ₽`, 'ok');
-      beep(1000, 0.2, 0.08);
-      return false;
-    }
-    return true;
-  });
-}
-
-/* ============ GENERATION ============ */
-function genAds() {
-  state.ads = [];
-  for (let i = 0; i < 16; i++) {
-    const type = Math.random() < 0.5 ? 'sell' : 'buy';
-    const base = 91.4 + Math.random() * 2.4;
-    const price = +(type === 'sell' ? base + rnd(0.04, 0.85) : base - rnd(0.04, 0.85)).toFixed(2);
-    const amount = +rnd(150, 6000).toFixed(2);
-    const maxRub = amount * price;
-    let min = pick([500, 1000, 2000, 3000, 5000]);
-    if (min > maxRub * 0.7) min = Math.max(300, Math.round(maxRub * 0.3));
-    const max = Math.min(maxRub, Math.max(min * 1.8, rnd(15000, 180000)));
-    state.ads.push({
-      id: AD_ID++, type, price, amount,
-      min: Math.round(min), max: Math.round(max),
-      methods: pickN(METHODS, Math.floor(rnd(1, 4))),
-      merchant: makeMerchant(pick(NAMES) + (Math.random() < .35 ? Math.floor(rnd(1,99)) : '')),
-      trend: Math.random() < 0.5 ? 'up' : 'down',
-    });
-  }
-}
-
-/* ============ EVENTS ============ */
-function triggerMarketEvent() {
-  const events = [
-    { id: 'whale', icon: '🐋', text: 'Кит разместил крупный ордер на продажу 50 000 USDT', impact: -0.3 },
-    { id: 'dip', icon: '📉', text: 'Коррекция: рынок просел на 1.2%', impact: -1.2 },
-    { id: 'spike', icon: '🚀', text: 'Рост: рынок прибавил 0.8% за 5 минут', impact: 0.8 },
-    { id: 'surge', icon: '⚡', text: 'Всплеск активности: 40+ новых объявлений за час', impact: 0 },
-    { id: 'news', icon: '📰', text: 'Новости: крупная биржа добавила поддержку USDT', impact: 0.4 },
-  ];
-  const ev = pick(events);
-  state.marketEvent = { ...ev, ts: Date.now() };
-  if (ev.impact !== 0) state.ads.forEach(a => { a.price = +Math.max(88, a.price + ev.impact * (0.5 + Math.random())).toFixed(2); });
-  if (ev.id === 'whale') {
-    state.ads.push({
-      id: AD_ID++, type: 'sell', price: +rnd(90, 92).toFixed(2), amount: 50000,
-      min: 50000, max: 50000 * 92, methods: pickN(METHODS, 3),
-      merchant: { name: '🐋 WhaleAlert', rating: 5.0, trades: 8421, verified: true, online: true, isBad: false, req: genRequisites() },
-      trend: 'down',
-    });
-  }
-  notify(`${ev.icon} ${ev.text}`);
-  if (state.tab === 'buy' || state.tab === 'sell') renderMarket(state.tab);
-  renderSparkline();
-}
-
-/* ============ RENDER: WALLET ============ */
-function renderWallet() {
-  const r = $('#balRub'), u = $('#balUsdt');
-  if (!r || !u) return;
-  if (state.hiddenBalance) {
-    r.textContent = '••••••';
-    u.textContent = '••••';
-    r.classList.add('hidden'); u.classList.add('hidden');
-    lastRenderedRub = state.rub; lastRenderedUsdt = state.usdt;
-    return;
-  }
-  r.classList.remove('hidden'); u.classList.remove('hidden');
-  const fmtRub = v => Math.round(v).toLocaleString('ru-RU') + ' ₽';
-  const fmtUsdt = v => v.toFixed(2).replace('.', ',') + ' USDT';
-  if (Math.abs(lastRenderedRub - state.rub) > 0.01) {
-    animateNumber(r, lastRenderedRub, state.rub, 650, fmtRub);
-    lastRenderedRub = state.rub;
-  } else {
-    r.textContent = fmtRub(state.rub);
-  }
-  if (Math.abs(lastRenderedUsdt - state.usdt) > 0.0001) {
-    animateNumber(u, lastRenderedUsdt, state.usdt, 650, fmtUsdt);
-    lastRenderedUsdt = state.usdt;
-  } else {
-    u.textContent = fmtUsdt(state.usdt);
-  }
-}
-
-function needsAction(o) { return o.status === 'pay' || o.status === 'confirm'; }
-function renderBadges() {
-  const n = state.orders.filter(needsAction).length;
-  ['#tabs [data-tab="orders"]', '.mobile-nav [data-tab="orders"]'].forEach(sel => {
-    const btn = $(sel); if (!btn) return;
-    $$('.badge', btn).forEach(b => b.remove());
-    if (n > 0) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = n; btn.appendChild(b); }
-  });
-}
-function isFav(name) { return state.favorites.includes(name); }
-function toggleFav(name) {
-  if (isFav(name)) state.favorites = state.favorites.filter(n => n !== name);
-  else state.favorites.push(name);
-  save();
-}
-
-/* ============ RENDER: MARKET ============ */
-function adCard(ad) {
-  const isSellAd = ad.type === 'sell';
-  const trend = ad.trend === 'up' ? '<span class="trend up">▲</span>' : '<span class="trend down">▼</span>';
-  const isWhale = ad.amount >= 10000;
-  const fav = isFav(ad.merchant.name);
-  return `
-  <div class="ad ${fav ? 'favorite' : ''}" data-ad-id="${ad.id}">
-    <div class="ad-user">
-      <button class="fav-btn ${fav ? 'on' : ''}" data-action="toggle-fav" data-name="${esc(ad.merchant.name)}" title="В избранное">${fav ? '★' : '☆'}</button>
-      <div class="ava" data-action="open-merchant" data-merchant="${esc(ad.merchant.name)}">${esc(ad.merchant.name[0].toUpperCase())}${ad.merchant.online ? '<span class="online"></span>' : ''}</div>
-      <div style="min-width:0">
-        <div class="ad-name" data-action="open-merchant" data-merchant="${esc(ad.merchant.name)}">${esc(ad.merchant.name)}${ad.merchant.verified ? '<span class="vbadge">✓</span>' : ''}</div>
-        <div class="ad-stats">${ad.merchant.trades.toLocaleString('ru-RU')} сделок · ${ad.merchant.rating.toFixed(1)}★</div>
-      </div>
-    </div>
-    <div class="ad-price"><b data-price>${n2(ad.price)} ₽${trend}</b><span>за 1 USDT</span></div>
-    <div class="ad-avail"><b>${n2(ad.amount)}</b><span>${isWhale ? '<span class="chip whale" style="padding:2px 6px;font-size:9px">🐋 КИТ</span>' : 'USDT доступно'}</span></div>
-    <div class="ad-limits"><b>${rubF(ad.min)} – ${rubF(ad.max)}</b><span>лимит</span></div>
-    <div class="ad-methods">${ad.methods.map(m => `<span class="chip">${esc(m)}</span>`).join('')}</div>
-    <button class="btn ${isSellAd ? 'green' : 'red'}" data-action="open-trade" data-ad="${ad.id}">${isSellAd ? 'Купить' : 'Продать'}</button>
-  </div>`;
-}
-
-function renderMarket(tab) {
-  const isBuy = tab === 'buy';
-  let list = state.ads.filter(a => a.type === (isBuy ? 'sell' : 'buy'));
-  if (state.filter.method !== 'all') list = list.filter(a => a.methods.includes(state.filter.method));
-  const amt = parseFloat(state.filter.amount);
-  if (amt > 0) list = list.filter(a => amt >= a.min && amt <= a.max);
-  if (state.filter.search) { const s = state.filter.search.toLowerCase(); list = list.filter(a => a.merchant.name.toLowerCase().includes(s)); }
-  if (state.filter.onlineOnly) list = list.filter(a => a.merchant.online);
-  if (state.filter.favOnly) list = list.filter(a => isFav(a.merchant.name));
-  const sort = state.filter.sort;
-  list.sort((a, b) => sort === 'rating' ? b.merchant.rating - a.merchant.rating : sort === 'amount' ? b.amount - a.amount : (isBuy ? a.price - b.price : b.price - a.price));
-  const avg = state.ads.length ? state.ads.reduce((s, a) => s + a.price, 0) / state.ads.length : 0;
-  const spread = getSpread();
-  const spreadHtml = spread ? `<div class="spread-pill">Спред: ${n2(spread.spread)} ₽ (${spread.pct.toFixed(2)}%)</div>` : '';
-  const arb = getArbitrage();
-  const arbHtml = arb ? `<div class="arb-banner"><span class="e-ico">💡</span><div class="e-text">Арбитраж: купи у <b>${esc(arb.buy.merchant.name)}</b> за <b>${n2(arb.buy.price)} ₽</b> → продай <b>${esc(arb.sell.merchant.name)}</b> за <b>${n2(arb.sell.price)} ₽</b> · <b>+${n2(arb.profit)} ₽/USDT</b></div></div>` : '';
-  const eventHtml = state.marketEvent && (Date.now() - state.marketEvent.ts < 120000) ? `<div class="event-banner"><span class="e-ico">${state.marketEvent.icon}</span><div class="e-text">${esc(state.marketEvent.text)}</div><button class="e-close" data-action="close-event">✕</button></div>` : '';
-  const host = $('#view-' + tab);
-  host.innerHTML = `
-    ${eventHtml}
-    ${arbHtml}
-    <div class="section-title">
-      <h2>${isBuy ? 'Купить USDT' : 'Продать USDT'}</h2>
-      <span class="hint">${list.length} объявлений</span>
-      <button class="btn ghost sm" data-action="open-price-alert" style="margin-left:auto">🔔 Алерт по курсу</button>
-    </div>
-    <div class="filters">
-      <input class="search" id="fSearch" type="text" placeholder="Поиск мерчанта..." value="${esc(state.filter.search)}">
-      <select id="fMethod"><option value="all">Все способы</option>${METHODS.map(m => `<option value="${m}" ${state.filter.method === m ? 'selected' : ''}>${m}</option>`).join('')}</select>
-      <input id="fAmount" type="number" placeholder="Сумма ₽" value="${esc(state.filter.amount)}">
-      <select id="fSort"><option value="price" ${sort==='price'?'selected':''}>По цене</option><option value="rating" ${sort==='rating'?'selected':''}>По рейтингу</option><option value="amount" ${sort==='amount'?'selected':''}>По объёму</option></select>
-      <label class="toggle ${state.filter.onlineOnly ? 'on' : ''}"><input type="checkbox" id="fOnline" ${state.filter.onlineOnly ? 'checked' : ''}>Онлайн</label>
-      <label class="toggle ${state.filter.favOnly ? 'on' : ''}"><input type="checkbox" id="fFav" ${state.filter.favOnly ? 'checked' : ''}>★ Избранные</label>
-      ${spreadHtml}
-      <div class="rate">Средний курс: <b>${n2(avg)} ₽</b></div>
-    </div>
-    <div class="ads-list">${list.length ? list.map(adCard).join('') : `<div class="empty"><div class="ico">🔍</div>Ничего не найдено. Измените фильтры.</div>`}</div>`;
-  $('#fSearch').addEventListener('input', e => { state.filter.search = e.target.value; const pos = e.target.selectionStart; renderMarket(tab); const el = $('#fSearch'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } });
-  $('#fMethod').addEventListener('change', e => { state.filter.method = e.target.value; renderMarket(tab); });
-  $('#fSort').addEventListener('change', e => { state.filter.sort = e.target.value; renderMarket(tab); });
-  $('#fOnline').addEventListener('change', e => { state.filter.onlineOnly = e.target.checked; renderMarket(tab); });
-  $('#fFav').addEventListener('change', e => { state.filter.favOnly = e.target.checked; renderMarket(tab); });
-  $('#fAmount').addEventListener('input', e => { state.filter.amount = e.target.value; const pos = e.target.selectionStart; renderMarket(tab); const el = $('#fAmount'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } });
-}
-
-function updateAdPricesInDOM() {
-  if (state.tab !== 'buy' && state.tab !== 'sell') return;
-  $$('.ad[data-ad-id]').forEach(el => {
-    const id = +el.dataset.adId;
-    const ad = state.ads.find(a => a.id === id);
-    if (!ad) return;
-    const p = el.querySelector('[data-price]');
-    if (p) {
-      const prev = parseFloat(p.textContent.replace(/[^\d.,]/g, '').replace(',', '.'));
-      const dir = ad.price > prev ? 'up' : ad.price < prev ? 'down' : null;
-      const trend = ad.trend === 'up' ? '<span class="trend up">▲</span>' : '<span class="trend down">▼</span>';
-      p.innerHTML = `${n2(ad.price)} ₽${trend}`;
-      if (dir && Math.abs(ad.price - prev) > 0.001) flashPrice(p, dir);
-    }
-  });
-}
-
-/* ============ MODAL HELPERS ============ */
-function closeModal() { state.openOrderId = null; $('#modalRoot').innerHTML = ''; }
-
-function askConfirm({ title, message, yesLabel = 'Подтвердить', noLabel = 'Отмена', danger = false }) {
-  return new Promise(resolve => {
-    const root = document.createElement('div');
-    root.innerHTML = `<div class="backdrop" style="z-index:250"><div class="modal" style="max-width:400px">
-      <div class="modal-head"><h3>${esc(title)}</h3><button class="x" data-cf="0">✕</button></div>
-      <div style="font-size:13.5px;color:var(--text-dim);margin-bottom:22px;line-height:1.6">${esc(message)}</div>
-      <div style="display:flex;gap:10px"><button class="btn ghost" style="flex:1" data-cf="0">${esc(noLabel)}</button><button class="btn ${danger?'red':'green'}" style="flex:1" data-cf="1">${esc(yesLabel)}</button></div>
-    </div></div>`;
-    document.body.appendChild(root);
-    const close = r => { root.remove(); resolve(r); };
-    root.addEventListener('click', e => {
-      const cf = e.target.closest('[data-cf]');
-      if (cf) { close(cf.dataset.cf === '1'); return; }
-      if (e.target.classList.contains('backdrop')) close(false);
-    });
-  });
-}
-
-function askPin() {
-  return new Promise(resolve => {
-    let entered = '';
-    const root = document.createElement('div');
-    const render = () => {
-      root.innerHTML = `<div class="backdrop" style="z-index:260"><div class="modal" style="max-width:380px">
-        <div class="modal-head"><h3>🔐 Подтверждение</h3><button class="x" data-pin-close="1">✕</button></div>
-        <div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:16px">Введите 4-значный PIN для подтверждения крупной сделки</div>
-        <div class="pin-dots">${[1,2,3,4].map(i => `<span class="${i <= entered.length ? 'on' : ''}"></span>`).join('')}</div>
-        <div class="pinpad">${[1,2,3,4,5,6,7,8,9].map(n => `<button data-pin="${n}">${n}</button>`).join('')}<button data-pin-clear="1">⌫</button><button data-pin="0">0</button><button data-pin-close="1">✕</button></div>
-        <div style="font-size:11px;color:var(--muted);text-align:center">Любая комбинация — это симуляция</div>
-      </div></div>`;
-    };
-    render();
-    document.body.appendChild(root);
-    const close = r => { root.remove(); resolve(r); };
-    root.addEventListener('click', e => {
-      const pin = e.target.closest('[data-pin]');
-      if (pin) {
-        if (entered.length < 4) {
-          entered += pin.dataset.pin;
-          if (entered.length === 4) { beep(880, 0.1, 0.06); setTimeout(() => close(true), 200); return; }
-          render();
-        }
-        return;
-      }
-      if (e.target.closest('[data-pin-clear]')) { entered = entered.slice(0, -1); render(); return; }
-      if (e.target.closest('[data-pin-close]') || e.target.classList.contains('backdrop')) close(false);
-    });
-  });
-}
-
-/* ============ TRADE MODAL ============ */
-let tradeMode = 'rub';
-
-async function openTradeModal(ad) {
-  if (!ad) return;
-  const side = ad.type === 'sell' ? 'buy' : 'sell';
-  tradeMode = 'rub';
-  const maxByBalance = side === 'buy' ? state.rub : state.usdt * ad.price;
-  const maxRub = Math.max(0, Math.min(ad.max, ad.amount * ad.price, maxByBalance));
-  const minRub = ad.min;
-  $('#modalRoot').innerHTML = `<div class="backdrop" data-action="backdrop"><div class="modal">
-    <div class="modal-head"><h3>${side === 'buy' ? 'Покупка' : 'Продажа'} USDT</h3><button class="x" data-action="close">✕</button></div>
-    <div class="ad-user" style="margin-bottom:18px"><div class="ava" data-action="open-merchant" data-merchant="${esc(ad.merchant.name)}">${esc(ad.merchant.name[0].toUpperCase())}${ad.merchant.online ? '<span class="online"></span>' : ''}</div>
-      <div><div class="ad-name" data-action="open-merchant" data-merchant="${esc(ad.merchant.name)}">${esc(ad.merchant.name)}${ad.merchant.verified ? '<span class="vbadge">✓</span>' : ''}</div>
-      <div class="ad-stats">${ad.merchant.trades.toLocaleString('ru-RU')} сделок · ${ad.merchant.rating.toFixed(1)}★ · курс ${n2(ad.price)} ₽</div></div></div>
-    <div class="field"><label>Сумма сделки</label>
-      <div class="seg" style="margin-bottom:10px"><button data-mode="rub" class="active">В рублях</button><button data-mode="usdt">В USDT</button></div>
-      <input id="tradeAmount" type="number" step="any" placeholder="0" value="${Math.round(Math.min(maxRub, Math.max(minRub, 10000)))}">
-      <div class="hint" id="tradeHint"></div></div>
-    <div class="field"><label>Способ оплаты</label><select id="tradeMethod">${ad.methods.map(m => `<option>${esc(m)}</option>`).join('')}</select></div>
-    <div class="summary" id="tradeSummary"></div>
-    <button class="btn ${side === 'buy' ? 'green' : 'red'} full" id="confirmTrade"></button>
-    <div class="hint" style="text-align:center;margin-top:12px">${side === 'buy' ? 'USDT продавца будут заблокированы в эскроу до подтверждения оплаты' : 'Ваши USDT будут заблокированы в эскроу до подтверждения получения денег'}</div>
-  </div></div>`;
-  const amountEl = $('#tradeAmount'), hintEl = $('#tradeHint');
-  function update() {
-    const v = parseFloat(amountEl.value) || 0;
-    const rubAmt = tradeMode === 'rub' ? v : v * ad.price;
-    const usdtAmt = tradeMode === 'rub' ? v / ad.price : v;
-    hintEl.textContent = `Лимит: ${rubF(minRub)} – ${rubF(maxRub)}` + (side === 'buy' ? ` · доступно ${rubF(state.rub)}` : ` · доступно ${usdF(state.usdt)}`);
-    const large = rubAmt >= LARGE_ORDER_THRESHOLD;
-    $('#tradeSummary').innerHTML = `<div><span>Курс</span><b>${n2(ad.price)} ₽ / USDT</b></div><div><span>Сумма в рублях</span><b>${rubF(rubAmt)}</b></div><div><span>Количество USDT</span><b>${usdF(usdtAmt)}</b></div><div><span>Комиссия платформы</span><b>0 ₽</b></div><div class="total"><span>${side === 'buy' ? 'Вы платите' : 'Вы получаете'}</span><b>${rubF(rubAmt)}</b></div>${large ? '<div style="font-size:11px;color:var(--yellow);margin-top:8px">🔐 Крупная сделка — потребуется PIN</div>' : ''}`;
-    const ok = rubAmt >= minRub - 0.01 && rubAmt <= maxRub + 0.01 && rubAmt > 0;
-    const btn = $('#confirmTrade');
-    btn.disabled = !ok;
-    btn.textContent = !ok ? (rubAmt <= 0 ? 'Введите сумму' : rubAmt < minRub ? 'Сумма меньше лимита' : 'Сумма больше лимита') : (side === 'buy' ? 'Купить USDT' : 'Продать USDT');
-  }
-  $$('.seg button', $('#modalRoot')).forEach(b => b.addEventListener('click', () => {
-    if (b.dataset.mode === tradeMode) return;
-    const v = parseFloat(amountEl.value) || 0;
-    tradeMode = b.dataset.mode;
-    $$('.seg button', $('#modalRoot')).forEach(x => x.classList.toggle('active', x === b));
-    amountEl.value = tradeMode === 'usdt' ? +(v / ad.price).toFixed(4) : Math.round(v * ad.price);
-    update();
-  }));
-  amountEl.addEventListener('input', update);
-  update();
-  $('#confirmTrade').addEventListener('click', async () => {
-    const v = parseFloat(amountEl.value) || 0;
-    const rubAmt = Math.round(tradeMode === 'rub' ? v : v * ad.price);
-    if (!(rubAmt >= minRub - 0.01 && rubAmt <= maxRub + 0.01)) return;
-    const method = $('#tradeMethod').value;
-    if (rubAmt >= LARGE_ORDER_THRESHOLD) { const ok = await askPin(); if (!ok) return; }
-    closeModal();
-    createOrder(ad, side, rubAmt, method);
-  });
-}
-
-/* ============ ORDER CORE ============ */
-function pushMsg(order, from, text) {
-  order.messages.push({ from, text, time: nowTime() });
-  if (from === 'them' && state.openOrderId !== order.id) { order.unread = (order.unread || 0) + 1; beep(880, 0.1, 0.05); }
-}
-function sysMsg(order, text) { pushMsg(order, 'system', text); }
-
-function refreshOrderUI(order) {
-  saveSoon(); renderWallet(); renderBadges();
-  if (state.tab === 'orders') renderOrders();
-  if (state.openOrderId === order.id) renderOrderModal();
-}
-
-function createOrder(ad, side, rubAmt, method, merchantOverride) {
-  const usdtAmt = +(rubAmt / ad.price).toFixed(6);
-  const merchant = merchantOverride || ad.merchant;
-  if (side === 'sell') {
-    if (usdtAmt > state.usdt + 1e-9) { toast('Недостаточно USDT', 'err'); return; }
-    state.usdt -= usdtAmt;
-  } else {
-    if (rubAmt > state.rub) { toast('Недостаточно RUB', 'err'); return; }
-  }
-  const order = {
-    id: 'ORD-' + (ORDER_ID++), side, price: ad.price,
-    usdt: usdtAmt, rub: rubAmt, method, merchant,
-    status: side === 'buy' ? 'pay' : 'merchant_pay',
-    createdAt: Date.now(), deadline: Date.now() + ORDER_TTL, messages: [], unread: 0,
-  };
-  state.totalCreated++;
-  sysMsg(order, `Сделка ${order.id} создана. ${side === 'buy' ? `USDT продавца (${usdF(usdtAmt)}) заблокированы в эскроу.` : `Ваши ${usdF(usdtAmt)} заблокированы в эскроу.`}`);
-  pushMsg(order, 'them', 'Привет! Я на связи, готов к сделке 👋');
-  if (side === 'buy') sysMsg(order, `Шаг 1: переведите ${rubF(rubAmt)} через «${method}» на реквизиты продавца. Шаг 2: нажмите «Я оплатил». На оплату — 15 минут.`);
-  else sysMsg(order, `Ожидайте оплаты от покупателя. После поступления денег нажмите «Подтвердить получение» — USDT уйдут покупателю.`);
-  state.orders.unshift(order);
-  state.openOrderId = order.id;
-  ad.amount = +(ad.amount - usdtAmt).toFixed(6);
-  notify(`Создана сделка ${order.id}`, order.id);
-  renderAll();
-  renderOrderModal();
-  toast('Сделка создана: ' + order.id, 'ok');
-  beep(520, 0.15, 0.06);
-  if (side === 'sell') scheduleBuyerPayment(order);
-}
-
-function simulateSMS(bank, amount) {
-  if (!state.smsSim) return;
-  const el = document.createElement('div');
-  el.className = 'toast sms';
-  el.innerHTML = `📱 <b>${bank}</b> · Зачисление ${rubF(amount)}`;
-  $('#toasts').appendChild(el);
-  setTimeout(() => {
-    el.style.transition = 'opacity .3s, transform .3s';
-    el.style.opacity = '0'; el.style.transform = 'translateY(12px)';
-    setTimeout(() => el.remove(), 320);
-  }, 3500);
-}
-
-function scheduleBuyerPayment(order) {
-  if (order.merchant.fraudType === 'cancel_request' && Math.random() < 0.5) {
-    setTimeout(() => {
-      if (order.status !== 'merchant_pay') return;
-      pushMsg(order, 'them', 'Слушайте, у меня не проходит платёж. Отмените сделку, я попробую ещё раз');
-      sysMsg(order, '⚠️ Покупатель просит отменить сделку. Это может быть попыткой уйти от оплаты. Не отменяйте без веской причины.');
-      refreshOrderUI(order);
-    }, rnd(8000, 15000));
-    return;
-  }
-  if (order.merchant.fraudType === 'fake_sms' && Math.random() < 0.5) {
-    setTimeout(() => {
-      if (order.status !== 'merchant_pay') return;
-      pushMsg(order, 'them', '✅ Перевод выполнен. Скриншот: /payments/receipt.png');
-      sysMsg(order, '⚠️ Покупатель прислал «скриншот» — это не подтверждение. Проверьте реальное поступление на счёт.');
-      refreshOrderUI(order);
-    }, rnd(5000, 10000));
-    return;
-  }
-  setTimeout(() => {
-    if (order.status !== 'merchant_pay') return;
-    if (!setOrderStatus(order, 'confirm')) return;
-    order.releaseAt = Date.now();
-    pushMsg(order, 'them', `Оплатил ${rubF(order.rub)} по ${order.method}. Проверьте поступление и подтвердите.`);
-    sysMsg(order, 'Покупатель отметил оплату. Проверьте счёт и нажмите «Подтвердить получение».');
-    simulateSMS(pick(BANKS_SMS), order.rub);
-    notify(`Покупатель оплатил сделку ${order.id}`, order.id);
-    refreshOrderUI(order);
-    toast('Покупатель оплатил ' + order.id, 'ok');
-  }, rnd(3500, 7000));
-}
-
-function afterUserPaid(order) {
-  if (order.merchant.isBad) {
-    if (order.merchant.fraudType === 'wrong_req' && Math.random() < 0.7) {
-      setTimeout(() => {
-        if (order.status !== 'release') return;
-        pushMsg(order, 'them', 'Извините, у меня карта заблокирована. Оплатите на другой счёт: 4276 **** **** 8899');
-        sysMsg(order, '⚠️ ОПАСНО: смена реквизитов после оплаты — типичная схема мошенничества. НЕ отправляйте повторно. Открывайте спор.');
-        refreshOrderUI(order);
-      }, rnd(3000, 6000));
-    } else if (order.merchant.fraudType === 'cancel_request' || Math.random() < 0.5) {
-      setTimeout(() => {
-        if (order.status !== 'release') return;
-        pushMsg(order, 'them', 'Извините, я ошибся с суммой. Отмените сделку, я переведу заново');
-        sysMsg(order, '⚠️ Внимание: просьба отменить сделку после оплаты — типичная схема мошенничества. НЕ отменяйте, открывайте спор.');
-        refreshOrderUI(order);
-      }, rnd(3000, 6000));
-    } else {
-      setTimeout(() => {
-        if (order.status !== 'release') return;
-        sysMsg(order, '⚠️ Продавец долго не отвечает. Если он не подтвердит — откройте спор.');
-        refreshOrderUI(order);
-      }, 60000);
-    }
-  } else {
-    setTimeout(() => {
-      if (order.status !== 'release') return;
-      pushMsg(order, 'them', 'Вижу оплату, проверяю поступление...');
-      refreshOrderUI(order);
-    }, rnd(1200, 2200));
-    setTimeout(() => {
-      if (order.status !== 'release') return;
-      completeOrder(order, 'Спасибо за сделку! ✅');
-      toast(`+${usdF(order.usdt)} зачислено`, 'ok');
-    }, rnd(3800, 6200));
-  }
-}
-
-function orderAction(id, op) {
-  const order = state.orders.find(o => o.id === id);
-  if (!order) return;
-  if (op === 'pay') {
-    if (order.status !== 'pay') return;
-    if (order.rub > state.rub) return toast('Недостаточно RUB', 'err');
-    state.rub -= order.rub;
-    if (!setOrderStatus(order, 'release')) return;
-    order.releaseAt = Date.now();
-    pushMsg(order, 'me', `Оплатил ${rubF(order.rub)} через ${order.method}.`);
-    sysMsg(order, 'Вы отметили оплату. Ожидайте подтверждения продавца. Если он не подтвердит — откройте спор.');
-    refreshOrderUI(order);
-    toast('Оплата отмечена. Ждём подтверждения.', 'ok');
-    beep(660, 0.12, 0.06);
-    afterUserPaid(order);
-  }
-  if (op === 'confirm') {
-    if (order.status !== 'confirm') return;
-    askConfirm({ title: 'Подтвердить получение', message: `Подтвердить получение ${rubF(order.rub)}? USDT (${usdF(order.usdt)}) будут отправлены покупателю.`, yesLabel: 'Подтвердить' })
-      .then(ok => {
-        if (!ok) return;
-        state.rub += order.rub;
-        pushMsg(order, 'me', 'Деньги получил, USDT отпущены.');
-        completeOrder(order, 'Спасибо, отличная сделка! 👍');
-        toast(`+${rubF(order.rub)} зачислено`, 'ok');
-      });
-  }
-  if (op === 'cancel') {
-    if (order.status !== 'pay' && order.status !== 'merchant_pay') return;
-    askConfirm({ title: 'Отменить сделку', message: 'Средства вернутся из эскроу на баланс. Продолжить?', yesLabel: 'Отменить', noLabel: 'Оставить', danger: true })
-      .then(ok => {
-        if (!ok) return;
-        if (!setOrderStatus(order, 'cancelled')) return;
-        state.totalCancelled++;
-        if (order.side === 'sell') state.usdt += order.usdt;
-        sysMsg(order, 'Сделка отменена. Средства возвращены из эскроу.');
-        notify(`Сделка ${order.id} отменена`, order.id);
-        refreshOrderUI(order);
-        toast('Сделка отменена', 'err');
-        beep(320, 0.15, 0.06);
-      });
-  }
-  if (op === 'dispute') {
-    if (!['release', 'confirm'].includes(order.status)) return;
-    askConfirm({ title: 'Открыть спор', message: 'Средства останутся в эскроу до решения арбитра. Продолжить?', yesLabel: 'Открыть спор', danger: true })
-      .then(ok => {
-        if (!ok) return;
-        if (!setOrderStatus(order, 'disputed')) return;
-        pushMsg(order, 'me', 'Открываю спор — есть проблема со сделкой.');
-        sysMsg(order, 'Спор открыт. Средства заморожены. Арбитр напишет в этот чат в течение 24 часов.');
-        notify(`Открыт спор по сделке ${order.id}`, order.id);
-        refreshOrderUI(order);
-        toast('Спор открыт. Средства заморожены.', 'err');
-        beep(300, 0.2, 0.07);
-      });
-  }
-}
-
-function completeOrder(order, lastMsg) {
-  if (!setOrderStatus(order, 'completed')) return;
-  order.completedAt = Date.now();
-  if (order.side === 'buy') { state.usdt += order.usdt; state.buyHistory.push({ amount: order.usdt, price: order.price }); }
-  if (lastMsg) pushMsg(order, 'them', lastMsg);
-  sysMsg(order, order.side === 'buy' ? `Сделка завершена. ${usdF(order.usdt)} зачислены на баланс.` : `Сделка завершена. ${rubF(order.rub)} зачислены на баланс.`);
-  state.stats.completed++;
-  state.stats.volumeRub += order.rub;
-  checkMissions();
-  notify(`Сделка ${order.id} завершена`, order.id);
-  refreshOrderUI(order);
-  beep(880, 0.14, 0.07);
-  if (!state.firstTradeCelebrated && state.stats.completed === 1) { state.firstTradeCelebrated = true; fireConfetti(); save(); }
-}
-
-function fireConfetti() {
-  const colors = ['#10e88a', '#ffd23f', '#5b9dff', '#ff4d6d', '#9b6dff', '#ffffff'];
-  for (let i = 0; i < 80; i++) {
-    const el = document.createElement('div');
-    el.className = 'confetti';
-    el.style.background = pick(colors);
-    el.style.left = rnd(0, 100) + 'vw';
-    el.style.top = '-20px';
-    el.style.borderRadius = Math.random() < 0.5 ? '50%' : '2px';
-    el.style.animationDelay = rnd(0, 0.4) + 's';
-    el.style.animationDuration = rnd(2, 3) + 's';
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 3200);
-  }
-}
-
-/* ============ RENDER: ORDER MODAL ============ */
-const STATUS_LABEL = {
-  pay: 'Ожидает вашей оплаты', release: 'Ожидает подтверждения продавца',
-  merchant_pay: 'Ожидает оплаты покупателя', confirm: 'Подтвердите получение денег',
-  completed: 'Завершено', cancelled: 'Отменено', disputed: 'Спор открыт',
-};
-function stepsFor(order) { return order.side === 'buy' ? ['Ордер создан','Вы отправили оплату','USDT получены'] : ['Ордер создан','Покупатель оплатил','Вы подтвердили получение']; }
-function doneCount(order) {
-  if (order.status === 'completed') return 3;
-  if (order.status === 'disputed') return 1;
-  if (order.side === 'buy') { if (order.status === 'pay') return 1; if (order.status === 'release') return 2; }
-  else { if (order.status === 'merchant_pay') return 1; if (order.status === 'confirm') return 2; }
-  return order.status === 'cancelled' ? 0 : 1;
-}
-
-function renderOrderModal() {
-  const order = state.orders.find(o => o.id === state.openOrderId);
-  if (!order) return;
-  if (order.unread) order.unread = 0;
-  const steps = stepsFor(order);
-  const done = doneCount(order);
-  const activeIdx = order.status === 'completed' ? -1 : done;
-  const isActive = ['pay', 'release', 'merchant_pay', 'confirm'].includes(order.status);
-  const timeLeft = order.deadline - Date.now();
-  const showTimer = isActive && ['pay', 'merchant_pay'].includes(order.status);
-  const graceLeft = order.releaseAt ? (order.releaseAt + DISPUTE_GRACE - Date.now()) : 0;
-  const canDispute = order.status === 'release' && graceLeft <= 0;
-
-  const showReq = order.side === 'buy' && ['pay', 'release', 'disputed', 'completed'].includes(order.status);
-  const reqHtml = showReq ? `<div class="req-block">
-    <div class="req-head"><span>💳 Реквизиты для оплаты</span><button class="copy-btn" data-action="copy-req" data-order="${order.id}">Копировать</button></div>
-    <div class="req-row"><span>Сумма к оплате</span><b>${rubF(order.rub)}</b></div>
-    <div class="req-row"><span>Банк</span><b>${esc(order.method)}</b></div>
-    <div class="req-row"><span>Номер карты</span><b>${order.merchant.req.card}</b></div>
-    <div class="req-row"><span>Телефон (СБП)</span><b>${order.merchant.req.phone}</b></div>
-    <div class="req-row"><span>Счёт получателя</span><b>${order.merchant.req.account}</b></div>
-    <div style="font-size:11px;color:var(--muted);margin-top:8px">Получатель: ${esc(order.merchant.name)}</div>
-  </div>` : '';
-
-  let actions = '';
-  if (order.status === 'pay') {
-    actions = `<button class="btn green full" data-action="order-op" data-order="${order.id}" data-op="pay">Я оплатил ${rubF(order.rub)}</button>
-      <button class="btn ghost full" style="margin-top:8px" data-action="order-op" data-order="${order.id}" data-op="cancel">Отменить сделку</button>`;
-  } else if (order.status === 'confirm') {
-    actions = `<button class="btn green full" data-action="order-op" data-order="${order.id}" data-op="confirm">Подтвердить получение ${rubF(order.rub)}</button>
-      <button class="btn ghost full" style="margin-top:8px" data-action="order-op" data-order="${order.id}" data-op="dispute">Открыть спор</button>`;
-  } else if (order.status === 'merchant_pay') {
-    actions = `<button class="btn ghost full" data-action="order-op" data-order="${order.id}" data-op="cancel">Отменить сделку</button>`;
-  } else if (order.status === 'release') {
-    actions = canDispute ? `<button class="btn ghost full" data-action="order-op" data-order="${order.id}" data-op="dispute">Продавец не отвечает — открыть спор</button>` : `<div class="hint" style="text-align:center;padding:8px">Продавец подтверждает оплату… Спор будет доступен через ${fmtLeft(graceLeft)}</div>`;
-  } else if (order.status === 'completed') {
-    if (!order.reviewed) {
-      const rated = order.reviewStars || 0;
-      actions = `<div class="hint" style="text-align:center;margin-bottom:12px">Оцените сделку и оставьте отзыв</div>
-        <div class="stars-input" id="reviewStars">${[1,2,3,4,5].map(i => `<span data-action="rate" data-v="${i}" class="${i <= rated ? 'on' : ''}">⭐</span>`).join('')}</div>
-        <textarea id="reviewText" placeholder="Текст отзыва (необязательно)" style="min-height:60px;margin-bottom:10px;font-size:13px"></textarea>
-        <button class="btn green full" data-action="submit-review" data-order="${order.id}">Отправить отзыв</button>
-        <button class="btn ghost full" style="margin-top:8px" data-action="download-poster" data-order="${order.id}">📸 Скачать постер сделки</button>`;
-    } else {
-      actions = `<div class="hint" style="text-align:center;padding:8px;color:var(--green)">✓ Спасибо за отзыв!</div>
-        <button class="btn ghost full" style="margin-top:8px" data-action="download-poster" data-order="${order.id}">📸 Скачать постер сделки</button>`;
-    }
-  } else if (order.status === 'disputed') {
-    actions = `<div class="hint" style="text-align:center;padding:10px">Арбитр изучает обращение. Средства заморожены.</div>`;
-  }
-
-  const chatMsgs = order.messages.map(m => {
-    if (m.from === 'system') return `<div class="msg system"><span class="help-ico">ℹ</span>${esc(m.text)}</div>`;
-    return `<div class="msg ${m.from === 'me' ? 'me' : 'them'}">${esc(m.text)}<div style="font-size:9.5px;opacity:.6;margin-top:3px">${m.time}</div></div>`;
-  }).join('');
-
-  const timerHtml = showTimer ? `<div class="timer-bar ${timeLeft < 60000 ? 'urgent' : ''}" id="timerBar"><span class="lbl">⏱ Время на оплату</span><span class="time" id="timerText">${fmtLeft(timeLeft)}</span></div>` : '';
-
-  $('#modalRoot').innerHTML = `<div class="backdrop" data-action="backdrop"><div class="modal wide">
-    <div class="modal-head">
-      <div><h3>Сделка ${order.id}</h3>
-        <div style="font-size:11.5px;color:var(--muted);margin-top:3px">${order.side === 'buy' ? 'Покупка' : 'Продажа'} USDT · ${n2(order.price)} ₽ · ${esc(order.method)}</div>
-      </div>
-      <button class="x" data-action="close">✕</button>
-    </div>
-    ${timerHtml}
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;flex-wrap:wrap">
-      <span class="status ${order.status}">${STATUS_LABEL[order.status]}</span>
-      <div style="text-align:right"><div style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.3px">${usdF(order.usdt)}</div><div style="font-size:12px;color:var(--muted)">${rubF(order.rub)}</div></div>
-    </div>
-    <div class="steps">${steps.map((s, i) => {
-      const cls = i < done ? 'done' : (i === activeIdx ? 'active' : '');
-      return `<div class="step ${cls}"><div class="dot">${i < done ? '✓' : i + 1}</div><div class="txt">${s}</div></div>`;
-    }).join('')}</div>
-    <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:16px">
-      <div class="ava" data-action="open-merchant" data-merchant="${esc(order.merchant.name)}">${esc(order.merchant.name[0].toUpperCase())}${order.merchant.online ? '<span class="online"></span>' : ''}</div>
-      <div><div class="ad-name" data-action="open-merchant" data-merchant="${esc(order.merchant.name)}" style="font-weight:600;font-size:13.5px">${esc(order.merchant.name)}</div>
-      <div style="font-size:11.5px;color:var(--muted);margin-top:2px">${order.side === 'buy' ? 'Продавец' : 'Покупатель'} · ${order.merchant.rating.toFixed(1)}★</div></div>
-    </div>
-    ${reqHtml}
-    ${actions}
-    <div class="chat" style="margin-top:18px">
-      <div class="chat-log" id="chatLog">${chatMsgs}</div>
-      <div class="quick-replies">
-        <button class="qr" data-action="order-help">❓ Помощь</button>
-        <button class="qr" data-action="qr" data-text="Оплатил ✅">Оплатил ✅</button>
-        <button class="qr" data-action="qr" data-text="Проверяю поступление">Проверяю</button>
-        <button class="qr" data-action="qr" data-text="Готов к сделке">Готов</button>
-        <button class="qr" data-action="qr" data-text="Спасибо за сделку!">Спасибо</button>
-      </div>
-      <div class="chat-input"><input id="chatMsg" placeholder="Написать сообщение..." maxlength="140"><button data-action="send-msg" data-order="${order.id}">➤</button></div>
-    </div>
-  </div></div>`;
-  const log = $('#chatLog'); log.scrollTop = log.scrollHeight;
-  $('#chatMsg').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(order.id); });
-}
-
-function orderHelp(order) {
-  const hints = {
-    pay: `Как оплатить: 1) переведите ${rubF(order.rub)} через «${order.method}» на реквизиты выше; 2) нажмите «Я оплатил»; 3) дождитесь подтверждения.`,
-    merchant_pay: 'Покупатель ещё не оплатил. Не отправляйте USDT до подтверждения поступления денег.',
-    release: 'Вы отметили оплату. Продавец проверяет поступление. Если он не подтверждает более 3 минут — откройте спор.',
-    confirm: 'Покупатель говорит, что оплатил. Проверьте счёт и нажмите «Подтвердить получение».',
-    completed: 'Сделка завершена. Оставьте отзыв — это влияет на рейтинг мерчанта.',
-    cancelled: 'Сделка отменена, средства возвращены из эскроу.',
-    disputed: 'Спор открыт. Средства заморожены. Арбитр напишет в этот чат в течение 24 часов.',
-  };
-  const t = hints[order.status];
-  if (t) sysMsg(order, t);
-  refreshOrderUI(order);
-}
-
-function sendChat(orderId, presetText) {
-  const order = state.orders.find(o => o.id === orderId);
-  if (!order) return;
-  const input = $('#chatMsg');
-  const text = presetText || (input ? input.value.trim() : '');
-  if (!text) return;
-  pushMsg(order, 'me', text);
-  if (input) input.value = '';
-  saveSoon();
-  const log = $('#chatLog');
-  if (log) {
-    log.insertAdjacentHTML('beforeend', `<div class="msg me">${esc(text)}<div style="font-size:9.5px;opacity:.6;margin-top:3px">${nowTime()}</div></div>`);
-    log.scrollTop = log.scrollHeight;
-  }
-  const replies = ['Хорошо, принял 👍', 'Да, всё в силе.', 'Сейчас проверю поступление.', 'Спасибо за оперативность!', 'Ок, жду подтверждения.', 'Всё верно, сумма совпадает.'];
-  setTimeout(() => {
-    const r = pick(replies);
-    pushMsg(order, 'them', r);
-    saveSoon();
-    const l = $('#chatLog');
-    if (l && state.openOrderId === orderId) {
-      l.insertAdjacentHTML('beforeend', `<div class="msg them">${esc(r)}<div style="font-size:9.5px;opacity:.6;margin-top:3px">${nowTime()}</div></div>`);
-      l.scrollTop = l.scrollHeight;
-    }
-    renderBadges();
-    if (state.tab === 'orders') renderOrders();
-  }, rnd(1200, 3000));
-}
-
-/* ============ POSTER ============ */
-function downloadPoster(order) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 800; canvas.height = 500;
-  const ctx = canvas.getContext('2d');
-  const grad = ctx.createLinearGradient(0, 0, 800, 500);
-  grad.addColorStop(0, '#0d1a2e'); grad.addColorStop(1, '#1a0d2e');
-  ctx.fillStyle = grad; ctx.fillRect(0, 0, 800, 500);
-  ctx.strokeStyle = 'rgba(255,255,255,.03)'; ctx.lineWidth = 1;
-  for (let i = 0; i < 800; i += 40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 500); ctx.stroke(); }
-  for (let i = 0; i < 500; i += 40) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(800, i); ctx.stroke(); }
-  ctx.fillStyle = '#5b9dff'; ctx.font = 'bold 20px Inter, sans-serif'; ctx.fillText('P2P Sim', 40, 60);
-  ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.font = '14px Inter, sans-serif'; ctx.fillText('Сделка завершена', 40, 85);
-  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 64px Inter, sans-serif'; ctx.fillText(usdF(order.usdt), 40, 180);
-  ctx.fillStyle = '#10e88a'; ctx.font = 'bold 28px Inter, sans-serif'; ctx.fillText(rubF(order.rub), 40, 230);
-  ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.font = '16px Inter, sans-serif';
-  ctx.fillText(`Курс: ${n2(order.price)} ₽ / USDT`, 40, 290);
-  ctx.fillText(`Мерчант: ${order.merchant.name}`, 40, 320);
-  ctx.fillText(`Способ: ${order.method}`, 40, 350);
-  ctx.fillText(`ID: ${order.id}`, 40, 380);
-  ctx.fillText(`Дата: ${new Date(order.completedAt || Date.now()).toLocaleString('ru-RU')}`, 40, 410);
-  ctx.fillStyle = '#10e88a'; ctx.beginPath(); ctx.arc(700, 100, 40, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#04120c'; ctx.lineWidth = 6; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(680, 100); ctx.lineTo(695, 115); ctx.lineTo(722, 82); ctx.stroke();
-  ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.font = '12px Inter, sans-serif';
-  ctx.fillText('Симулятор P2P-торговли · не является финансовым документом', 40, 470);
-  canvas.toBlob(blob => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `p2p-${order.id}.png`; a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast('Постер скачан', 'ok');
-  });
-}
-
-/* ============ MERCHANT MODAL ============ */
-function openMerchantModal(name) {
-  const merchant = state.ads.find(a => a.merchant.name === name)?.merchant
-    || state.orders.find(o => o.merchant.name === name)?.merchant
-    || state.myAds.find(a => a.merchant.name === name)?.merchant;
-  if (!merchant) return;
-  const ads = state.ads.filter(a => a.merchant.name === name && a.amount > 0.5);
-  const reviews = state.reviews[name] || [];
-  const fav = isFav(name);
-  const reviewsHtml = reviews.length
-    ? reviews.slice(0, 5).map(r => `<div class="review-item"><div class="review-head"><span>${esc(r.from)}</span><span class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</span></div><div class="review-text">${esc(r.text)}</div><div class="review-time">${timeAgo(r.ts || Date.now())}</div></div>`).join('')
-    : `<div class="hint" style="padding:16px;text-align:center">Отзывов пока нет</div>`;
-  const adsHtml = ads.length ? ads.map(adCard).join('') : `<div class="hint" style="padding:16px;text-align:center">Нет активных объявлений</div>`;
-  $('#modalRoot').innerHTML = `<div class="backdrop" data-action="backdrop"><div class="modal wide">
-    <div class="modal-head">
-      <div><h3>${esc(merchant.name)}</h3>
-        <div style="font-size:11.5px;color:var(--muted);margin-top:3px">${merchant.verified ? '✓ Верифицирован · ' : ''}${merchant.trades.toLocaleString('ru-RU')} сделок · ${merchant.rating.toFixed(2)}★</div>
-      </div>
-      <div style="display:flex;gap:6px">
-        <button class="btn ghost sm" data-action="toggle-fav" data-name="${esc(merchant.name)}" data-close-after="1">${fav ? '★ В избранном' : '☆ В избранное'}</button>
-        <button class="x" data-action="close">✕</button>
-      </div>
-    </div>
-    <div class="profile-grid" style="margin-bottom:20px">
-      <div class="stat-card"><div class="lbl">Сделок</div><div class="val">${merchant.trades.toLocaleString('ru-RU')}</div></div>
-      <div class="stat-card"><div class="lbl">Рейтинг</div><div class="val yellow">${merchant.rating.toFixed(2)} ★</div></div>
-      <div class="stat-card"><div class="lbl">Отзывов</div><div class="val">${reviews.length}</div></div>
-    </div>
-    <h4 style="font-size:14px;margin-bottom:12px;font-weight:700">Отзывы</h4>
-    <div style="margin-bottom:20px">${reviewsHtml}</div>
-    <h4 style="font-size:14px;margin-bottom:12px;font-weight:700">Активные объявления</h4>
-    <div class="ads-list">${adsHtml}</div>
-  </div></div>`;
-}
-
-/* ============ NOTIFICATIONS MODAL ============ */
-function openNotificationsModal() {
-  const list = state.notifications;
-  const html = list.length ? list.map(n => `
-    <div class="review-item" style="${!n.read ? 'border-color:rgba(91,157,255,.3);background:rgba(91,157,255,.05)' : ''}" data-action="open-notification" data-notif="${n.id}" data-order="${n.orderId || ''}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-        <div style="flex:1">
-          <div style="font-size:13px;line-height:1.4">${esc(n.text)}</div>
-          <div class="review-time">${timeAgo(n.ts || Date.now())}</div>
-        </div>
-        ${!n.read ? '<span style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:6px;box-shadow:0 0 8px var(--blue);animation:pulse 1.5s infinite"></span>' : ''}
-      </div>
-    </div>`).join('') : `<div class="empty" style="padding:40px 20px"><div class="ico">🔔</div>Уведомлений пока нет</div>`;
-  $('#modalRoot').innerHTML = `<div class="backdrop" data-action="backdrop"><div class="modal wide">
-    <div class="modal-head">
-      <h3>Уведомления</h3>
-      <div style="display:flex;gap:8px">
-        <button class="btn ghost sm" data-action="read-all">Прочитать все</button>
-        <button class="x" data-action="close">✕</button>
-      </div>
-    </div>
-    <div>${html}</div>
-  </div></div>`;
-}
-
-/* ============ PRICE ALERT ============ */
-function openPriceAlertModal() {
-  const current = getAvgMarketPrice();
-  const alertsHtml = state.priceAlerts.length ? state.priceAlerts.map((a, i) => `
-    <div class="review-item" style="display:flex;justify-content:space-between;align-items:center">
-      <div><b>${a.direction === 'below' ? '↓' : '↑'} ${n2(a.price)} ₽</b> <span style="color:var(--muted);font-size:11.5px">${timeAgo(a.created)}</span></div>
-      <button class="btn ghost sm" data-action="del-alert" data-idx="${i}">Удалить</button>
-    </div>`).join('') : '<div class="hint" style="padding:12px;text-align:center">Нет активных алертов</div>';
-  $('#modalRoot').innerHTML = `<div class="backdrop" data-action="backdrop"><div class="modal">
-    <div class="modal-head"><h3>🔔 Алерт по курсу</h3><button class="x" data-action="close">✕</button></div>
-    <div class="hint" style="margin-bottom:14px">Текущий средний курс: <b style="color:var(--green)">${n2(current)} ₽</b></div>
-    <div class="seg" id="alertDir" style="margin-bottom:12px"><button data-dir="below" class="active">Курс ниже</button><button data-dir="above">Курс выше</button></div>
-    <div class="field"><label>Целевая цена (₽)</label><input id="alertPrice" type="number" step="0.1" value="${(current - 1).toFixed(1)}"></div>
-    <button class="btn green full" data-action="add-alert">Добавить алерт</button>
-    <h4 style="font-size:13px;margin:18px 0 10px;font-weight:700">Активные</h4>
-    <div id="alertsList">${alertsHtml}</div>
-  </div></div>`;
-  let dir = 'below';
-  $$('#alertDir button').forEach(b => b.addEventListener('click', () => {
-    dir = b.dataset.dir;
-    $$('#alertDir button').forEach(x => x.classList.toggle('active', x === b));
-  }));
-  $('#modalRoot')._alertDir = dir;
-}
-
-/* ============ MY ADS ============ */
-function renderMyAds() {
-  const host = $('#view-myads');
-  const active = state.myAds.filter(a => a.amount > 0.01);
-  const paused = state.myAds.filter(a => a.amount <= 0.01);
-  host.innerHTML = `
-    <div class="section-title"><h2>Мои объявления</h2><span class="hint">${active.length} активных${paused.length ? ' · ' + paused.length + ' исчерпано' : ''}</span></div>
-    <div class="card" style="margin-bottom:22px">
-      <h3 style="font-size:15px;margin-bottom:18px;font-weight:700">Создать объявление</h3>
-      <div class="field"><label>Тип объявления</label>
-        <div class="seg" id="newAdType"><button data-type="sell" class="active">Продаю USDT</button><button data-type="buy">Покупаю USDT</button></div>
-      </div>
-      <div class="row2">
-        <div class="field"><label>Цена за 1 USDT (₽)</label><input id="newPrice" type="number" step="0.01" value="92.50"></div>
-        <div class="field"><label>Количество USDT</label><input id="newAmount" type="number" step="1" value="1000"></div>
-      </div>
-      <div class="row2">
-        <div class="field"><label>Мин. лимит (₽)</label><input id="newMin" type="number" step="100" value="1000"></div>
-        <div class="field"><label>Макс. лимит (₽)</label><input id="newMax" type="number" step="100" value="50000"></div>
-      </div>
-      <div class="field"><label>Способы оплаты</label>
-        <div class="checkline" id="newMethods">${METHODS.map((m, i) => `<label class="${i < 2 ? 'on' : ''}"><input type="checkbox" value="${m}" ${i < 2 ? 'checked' : ''}>${m}</label>`).join('')}</div>
-      </div>
-      <button class="btn green" id="publishAd" style="width:100%">Опубликовать</button>
-    </div>
-    <div class="ads-list">${active.length ? active.map(myAdCard).join('') : `<div class="empty"><div class="ico">📄</div>У вас пока нет активных объявлений</div>`}</div>
-    ${paused.length ? `<h3 style="font-size:15px;margin:24px 0 14px;font-weight:700;color:var(--muted)">Исчерпанные</h3><div class="ads-list">${paused.map(myAdCard).join('')}</div>` : ''}`;
-  let newType = 'sell';
-  $$('#newAdType button').forEach(b => b.addEventListener('click', () => {
-    newType = b.dataset.type;
-    $$('#newAdType button').forEach(x => x.classList.toggle('active', x === b));
-  }));
-  $$('#newMethods label').forEach(l => l.addEventListener('click', () => setTimeout(() => l.classList.toggle('on', l.querySelector('input').checked), 0)));
-  $('#publishAd').addEventListener('click', () => {
-    const price = parseFloat($('#newPrice').value);
-    const amount = parseFloat($('#newAmount').value);
-    const min = parseFloat($('#newMin').value);
-    const max = parseFloat($('#newMax').value);
-    const methods = $$('#newMethods input:checked').map(i => i.value);
-    if (!price || price <= 0) return toast('Укажите цену', 'err');
-    if (!amount || amount <= 0) return toast('Укажите количество', 'err');
-    if (!min || !max || min >= max) return toast('Проверьте лимиты', 'err');
-    if (!methods.length) return toast('Выберите оплату', 'err');
-    if (newType === 'sell' && amount > state.usdt) return toast('Недостаточно USDT', 'err');
-    state.myAds.push({ id: AD_ID++, type: newType, price: +price.toFixed(2), amount, originalAmount: amount, min, max, methods, merchant: { name: 'Вы', rating: 5.0, trades: 0, verified: true, online: true, req: genRequisites() }, mine: true, createdAt: Date.now() });
-    save(); toast('Объявление опубликовано', 'ok'); checkMissions(); renderMyAds();
-  });
-}
-
-function myAdCard(ad) {
-  const total = ad.originalAmount || ad.amount;
-  const pct = total > 0 ? Math.round((ad.amount / total) * 100) : 0;
-  const low = pct < 30 && pct > 0;
-  const empty = ad.amount <= 0.01;
-  const stale = Date.now() - (ad.createdAt || Date.now()) > 30 * 60 * 1000;
-  const statusChip = empty ? '<span class="chip" style="border-color:rgba(107,119,133,.3);color:var(--muted)">Исчерпано</span>'
-    : low ? `<span class="chip" style="border-color:rgba(255,210,63,.4);color:var(--yellow)">Осталось ${pct}%</span>`
-    : stale ? `<span class="chip" style="border-color:rgba(255,77,109,.3);color:var(--red)">Устарело</span>`
-    : `<span class="chip" style="border-color:rgba(16,232,138,.3);color:var(--green)">${pct}%</span>`;
-  return `<div class="ad">
-    <div class="ad-user">
-      <div class="ava" style="background:linear-gradient(135deg,#3a2f10,#2a2208);color:var(--yellow);border-color:rgba(255,210,63,.2)">Я</div>
-      <div><div class="ad-name">Ваше объявление <span class="chip" style="margin-left:6px">${ad.type === 'sell' ? 'Продажа' : 'Покупка'}</span> ${statusChip}</div>
-      <div class="ad-stats">${ad.methods.join(' · ')}${ad.createdAt ? ' · ' + timeAgo(ad.createdAt) : ''}</div></div>
-    </div>
-    <div class="ad-price"><b>${n2(ad.price)} ₽</b><span>за 1 USDT</span></div>
-    <div class="ad-avail"><b>${n2(ad.amount)}</b><span>из ${n2(total)} USDT</span></div>
-    <div class="ad-limits"><b>${rubF(ad.min)} – ${rubF(ad.max)}</b><span>лимит</span></div>
-    <div class="ad-methods"></div>
-    <div style="display:flex;gap:6px">
-      ${empty || stale ? `<button class="btn ghost sm" data-action="restock-ad" data-ad="${ad.id}">Обновить</button>` : ''}
-      <button class="btn ghost sm" data-action="del-ad" data-ad="${ad.id}">Удалить</button>
-    </div>
-  </div>`;
-}
-
-/* ============ ORDERS ============ */
-function renderOrders() {
-  const host = $('#view-orders');
-  const filter = state.ordersFilter;
-  let list = state.orders;
-  if (filter === 'active') list = list.filter(o => ['pay', 'release', 'merchant_pay', 'confirm'].includes(o.status));
-  if (filter === 'completed') list = list.filter(o => o.status === 'completed');
-  if (filter === 'disputed') list = list.filter(o => o.status === 'disputed');
-  const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
-  const page = Math.min(state.ordersPage, totalPages);
-  const visible = list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const paginationHtml = totalPages > 1 ? `<div class="pagination">
-    <button data-action="orders-page" data-page="${page - 1}" ${page === 1 ? 'disabled' : ''}>←</button>
-    ${Array.from({ length: totalPages }, (_, i) => `<button data-action="orders-page" data-page="${i + 1}" class="${i + 1 === page ? 'active' : ''}">${i + 1}</button>`).join('')}
-    <button data-action="orders-page" data-page="${page + 1}" ${page === totalPages ? 'disabled' : ''}>→</button>
-  </div>` : '';
-  host.innerHTML = `
-    <div class="section-title"><h2>Мои сделки</h2><span class="hint">${state.orders.length} всего</span>
-      <button class="btn ghost sm" data-action="export-csv" style="margin-left:auto">📥 Экспорт CSV</button>
-    </div>
-    <div class="filters">
-      <select id="oFilter"><option value="all" ${filter==='all'?'selected':''}>Все сделки</option><option value="active" ${filter==='active'?'selected':''}>Активные</option><option value="completed" ${filter==='completed'?'selected':''}>Завершённые</option><option value="disputed" ${filter==='disputed'?'selected':''}>Споры</option></select>
-    </div>
-    <div class="ads-list">${visible.length ? visible.map(o => {
-      const unread = o.unread || 0;
-      return `<div class="order-row ${needsAction(o) ? 'needs' : ''}" data-action="open-order" data-order="${o.id}">
-        ${unread > 0 ? `<span class="unread">${unread}</span>` : ''}
-        <div class="order-type ${o.side}">${o.side === 'buy' ? 'ПОКУПКА' : 'ПРОДАЖА'}</div>
-        <div class="order-info"><div class="big">${usdF(o.usdt)}</div><div class="sub">${o.id} · ${esc(o.merchant.name)} · ${esc(o.method)} · ${timeAgo(o.createdAt)}</div></div>
-        <div class="order-rub">${rubF(o.rub)}</div>
-        <span class="status ${o.status}">${STATUS_LABEL[o.status]}</span>
-      </div>`;
-    }).join('') : `<div class="empty"><div class="ico">📊</div>${filter === 'all' ? 'Сделок пока нет. Найдите объявление на рынке.' : 'По фильтру ничего не найдено.'}</div>`}</div>
-    ${paginationHtml}`;
-  $('#oFilter').addEventListener('change', e => { state.ordersFilter = e.target.value; state.ordersPage = 1; renderOrders(); });
-}
-
-/* ============ PROFILE ============ */
-function renderProfile() {
-  const host = $('#view-profile');
-  const avgRating = state.stats.ratingsCount ? (state.stats.rating / state.stats.ratingsCount).toFixed(2) : '5.00';
-  const pf = getPortfolio();
-  const pnlClass = pf.pnl >= 0 ? 'green' : 'red';
-  const pnlSign = pf.pnl >= 0 ? '+' : '';
-  const compRate = state.totalCreated > 0 ? Math.round(((state.totalCreated - state.totalCancelled) / state.totalCreated) * 100) : 100;
-  const streakHtml = state.streak.days > 1 ? `<span class="streak-badge">🔥 ${state.streak.days} дн подряд</span>` : '';
-  host.innerHTML = `
-    <div class="section-title"><h2>Профиль и статистика</h2>${streakHtml}</div>
-    <div class="profile-grid">
-      <div class="stat-card"><div class="lbl">Завершено сделок</div><div class="val">${state.stats.completed}</div></div>
-      <div class="stat-card"><div class="lbl">Объём торгов</div><div class="val green">${rubF(state.stats.volumeRub)}</div></div>
-      <div class="stat-card"><div class="lbl">Рейтинг</div><div class="val yellow">${avgRating} ★</div></div>
-      <div class="stat-card"><div class="lbl">Completion rate</div><div class="val ${compRate >= 90 ? 'green' : compRate >= 70 ? 'yellow' : 'red'}">${compRate}%</div></div>
-    </div>
-    <h3 style="font-size:15px;margin:24px 0 14px;font-weight:700">Портфель</h3>
-    <div class="profile-grid">
-      <div class="stat-card"><div class="lbl">USDT</div><div class="val">${usdF(state.usdt)}</div></div>
-      <div class="stat-card"><div class="lbl">Средняя цена</div><div class="val">${pf.avg ? n2(pf.avg) + ' ₽' : '—'}</div></div>
-      <div class="stat-card"><div class="lbl">Стоимость</div><div class="val">${rubF(pf.value)}</div></div>
-      <div class="stat-card"><div class="lbl">P&L</div><div class="val ${pnlClass}">${pnlSign}${rubF(pf.pnl)}<span style="font-size:13px;color:var(--muted);margin-left:6px;font-weight:600">(${pf.pnlPct >= 0 ? '+' : ''}${pf.pnlPct.toFixed(2)}%)</span></div></div>
-    </div>
-    <h3 style="font-size:15px;margin:24px 0 14px;font-weight:700">Достижения</h3>
-    <div>${MISSIONS.map(m => `<div class="mission-card ${state.missions[m.id] ? 'done' : ''}"><div class="check">${state.missions[m.id] ? '✓' : ''}</div><div class="m-info"><div class="m-name">${m.name}</div><div class="m-desc">${m.desc}</div></div></div>`).join('')}</div>
-    <h3 style="font-size:15px;margin:24px 0 14px;font-weight:700">Настройки</h3>
-    <div class="setting-row"><div class="info">Тёмная тема<small>Переключение светлой и тёмной темы</small></div><div class="switch ${state.theme === 'dark' ? 'on' : ''}" data-action="toggle-theme-switch"></div></div>
-    <div class="setting-row"><div class="info">Звуковые уведомления<small>Короткий сигнал при событиях</small></div><div class="switch ${state.sound ? 'on' : ''}" data-action="toggle-sound"></div></div>
-    <div class="setting-row"><div class="info">Громкость звука<small>${Math.round(state.volume * 100)}%</small></div><input type="range" min="0" max="100" value="${Math.round(state.volume * 100)}" class="slider" id="volSlider"></div>
-    <div class="setting-row"><div class="info">СМС-симуляция<small>Имитация СМС от банка при оплате</small></div><div class="switch ${state.smsSim ? 'on' : ''}" data-action="toggle-sms"></div></div>
-    <div class="setting-row"><div class="info">Показывать баланс<small>Скрыть суммы от посторонних</small></div><div class="switch ${!state.hiddenBalance ? 'on' : ''}" data-action="toggle-hide-switch"></div></div>
-    <div class="setting-row"><div class="info">Экспорт истории<small>Скачать CSV со сделками</small></div><button class="btn ghost" data-action="export-csv">📥 CSV</button></div>
-    <div class="setting-row"><div class="info" style="color:var(--red)">Сбросить всё<small>Удалить прогресс и историю</small></div><button class="btn ghost" style="border-color:rgba(255,77,109,.3);color:var(--red)" data-action="reset">Сбросить</button></div>
-  `;
-  const slider = $('#volSlider');
-  if (slider) slider.addEventListener('input', e => {
-    state.volume = e.target.value / 100;
-    const small = slider.closest('.setting-row').querySelector('.info small');
-    if (small) small.textContent = Math.round(state.volume * 100) + '%';
-    save();
-  });
-}
-
-/* ============ CSV ============ */
-function exportCSV() {
-  if (!state.orders.length) { toast('Нет сделок для экспорта', 'err'); return; }
-  const rows = [['ID', 'Тип', 'Мерчант', 'USDT', 'Руб', 'Курс', 'Способ', 'Статус', 'Дата создания', 'Дата завершения']];
-  state.orders.forEach(o => {
-    rows.push([o.id, o.side === 'buy' ? 'Покупка' : 'Продажа', o.merchant.name, o.usdt, o.rub, o.price, o.method, STATUS_LABEL[o.status], new Date(o.createdAt).toLocaleString('ru-RU'), o.completedAt ? new Date(o.completedAt).toLocaleString('ru-RU') : '']);
-  });
-  const csv = '\uFEFF' + rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = `p2p-orders-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-  toast(`Экспортировано ${state.orders.length} сделок`, 'ok');
-}
-
-/* ============ TICK ============ */
-function tick() {
-  const now = Date.now();
-  let changed = false;
-  for (const order of state.orders) {
-    if ((order.status === 'pay' || order.status === 'merchant_pay') && now > order.deadline) {
-      if (!setOrderStatus(order, 'cancelled')) continue;
-      state.totalCancelled++;
-      if (order.side === 'sell') state.usdt += order.usdt;
-      sysMsg(order, 'Время на оплату истекло. Сделка отменена автоматически.');
-      changed = true;
-    }
-  }
-  if (changed) { renderWallet(); renderBadges(); if (state.tab === 'orders') renderOrders(); if (state.openOrderId) renderOrderModal(); toast('Сделка отменена по таймауту', 'err'); saveSoon(); }
-  const timerText = $('#timerText');
-  if (timerText && state.openOrderId) {
-    const order = state.orders.find(o => o.id === state.openOrderId);
-    if (order && (order.status === 'pay' || order.status === 'merchant_pay')) {
-      const left = order.deadline - now;
-      timerText.textContent = fmtLeft(left);
-      const bar = $('#timerBar');
-      if (bar) bar.classList.toggle('urgent', left < 60000);
-    }
-  }
-  if (state.openOrderId) {
-    const order = state.orders.find(o => o.id === state.openOrderId);
-    if (order && order.status === 'release' && order.releaseAt) {
-      const gracePassed = now > order.releaseAt + DISPUTE_GRACE;
-      const hasDisputeBtn = !!$('#modalRoot [data-op="dispute"]');
-      if (gracePassed && !hasDisputeBtn) renderOrderModal();
-    }
-  }
-  checkPriceAlerts();
-  if (state.marketEvent && now - state.marketEvent.ts > 120000) {
-    state.marketEvent = null;
-    if (state.tab === 'buy' || state.tab === 'sell') renderMarket(state.tab);
-  }
-}
-
-/* ============ INCOMING ============ */
-function maybeIncomingOrder() {
-  const active = state.myAds.filter(a => a.amount > 0.5 && Date.now() - (a.createdAt || 0) < 30 * 60 * 1000);
-  if (!active.length) return;
-  if (Math.random() > 0.55) return;
-  const ad = pick(active);
-  const maxRub = Math.min(ad.max, ad.amount * ad.price);
-  if (maxRub < ad.min) return;
-  const rubAmt = Math.round(rnd(ad.min, maxRub));
-  const usdtAmt = rubAmt / ad.price;
-  if (usdtAmt > ad.amount) return;
-  const side = ad.type === 'sell' ? 'sell' : 'buy';
-  if (side === 'sell' && usdtAmt > state.usdt) return;
-  if (side === 'buy' && rubAmt > state.rub) return;
-  ad.amount = +(ad.amount - usdtAmt).toFixed(6);
-  if (side === 'sell') state.usdt -= usdtAmt;
-  const order = {
-    id: 'ORD-' + (ORDER_ID++), side, price: ad.price,
-    usdt: +usdtAmt.toFixed(6), rub: rubAmt, method: pick(ad.methods), merchant: makeMerchant(pick(NAMES)),
-    status: side === 'buy' ? 'pay' : 'merchant_pay',
-    createdAt: Date.now(), deadline: Date.now() + ORDER_TTL, messages: [], unread: 0,
-  };
-  state.totalCreated++;
-  sysMsg(order, 'По вашему объявлению создан новый ордер.');
-  pushMsg(order, 'them', 'Здравствуйте! Хочу совершить сделку по вашему объявлению.');
-  pushMsg(order, 'them', 'Подскажите реквизиты для оплаты?');
-  state.orders.unshift(order);
-  notify(`Новый ордер ${order.id}`, order.id);
-  toast(`Новый ордер ${order.id}`, 'ok');
-  beep(720, 0.14, 0.06);
-  if (side === 'sell') scheduleBuyerPayment(order);
-  saveSoon(); renderWallet(); renderBadges();
-  if (state.tab === 'orders') renderOrders();
-}
-
-/* ============ RENDER ALL ============ */
-function renderAll() {
-  renderWallet();
-  renderBadges();
-  renderBell();
-  renderSparkline();
-  ['buy', 'sell', 'myads', 'orders', 'profile'].forEach(t => {
-    const el = $('#view-' + t);
-    if (el) el.style.display = (state.tab === t) ? '' : 'none';
-  });
-  if (state.tab === 'buy' || state.tab === 'sell') renderMarket(state.tab);
-  if (state.tab === 'myads') renderMyAds();
-  if (state.tab === 'orders') renderOrders();
-  if (state.tab === 'profile') renderProfile();
-  saveSoon();
-}
-
-/* ============ TOAST ============ */
-function toast(text, type = '') {
-  const el = document.createElement('div');
-  el.className = 'toast ' + type;
-  el.textContent = text;
-  $('#toasts').appendChild(el);
-  setTimeout(() => {
-    el.style.transition = 'opacity .35s, transform .35s';
-    el.style.opacity = '0'; el.style.transform = 'translateY(12px)';
-    setTimeout(() => el.remove(), 350);
-  }, 2800);
-}
-
-/* ============ THEME ============ */
-function applyTheme(theme) {
-  state.theme = theme;
-  document.documentElement.setAttribute('data-theme', theme);
-  const btn = $('#themeBtn');
-  if (btn) btn.textContent = theme === 'dark' ? '🌙' : '☀️';
-  save();
-}
-
-/* ============ STREAK ============ */
-function updateStreak() {
-  const today = new Date().toDateString();
-  const last = state.streak.lastVisit;
-  if (last === today) return;
-  const yesterday = new Date(Date.now() - 86400000).toDateString();
-  if (last === yesterday) state.streak.days = (state.streak.days || 0) + 1;
-  else state.streak.days = 1;
-  state.streak.lastVisit = today;
-  save();
-}
-
-/* ============ ONBOARDING ============ */
-let onboardIdx = 0;
-function showOnboarding() { onboardIdx = 0; renderOnboard(); }
-function renderOnboard() {
-  const step = ONBOARD_STEPS[onboardIdx];
-  const isLast = onboardIdx === ONBOARD_STEPS.length - 1;
-  let root = $('#onboardRoot');
-  if (!root) { root = document.createElement('div'); root.id = 'onboardRoot'; document.body.appendChild(root); }
-  root.innerHTML = `<div class="onboard-overlay">
-    <div class="onboard-card">
-      <div class="onboard-icon">${step.icon}</div>
-      <h3>${esc(step.title)}</h3>
-      <p>${esc(step.text)}</p>
-      <div class="onboard-dots">${ONBOARD_STEPS.map((_, i) => `<span class="${i === onboardIdx ? 'active' : ''}"></span>`).join('')}</div>
-      <div class="onboard-actions">
-        ${onboardIdx > 0 ? `<button class="btn ghost" style="flex:1" data-action="onboard-prev">Назад</button>` : ''}
-        <button class="btn green" style="flex:1" data-action="onboard-next">${isLast ? 'Начать' : 'Далее'}</button>
-      </div>
-    </div>
-  </div>`;
-}
-function closeOnboarding() { const root = $('#onboardRoot'); if (root) root.remove(); state.onboarded = true; save(); }
-
-/* ============ RIPPLE DELEGATION ============ */
-document.addEventListener('mousedown', e => {
-  const btn = e.target.closest('.btn, .pinpad button, .qr');
-  if (btn) addRipple({ currentTarget: btn, clientX: e.clientX, clientY: e.clientY });
-});
-
-/* ============ EVENTS ============ */
-document.addEventListener('click', e => {
-  const el = e.target.closest('[data-action]');
-  if (!el) return;
-  const a = el.dataset.action;
-  if (a === 'backdrop') { if (e.target === el) closeModal(); return; }
-  if (a === 'close') { closeModal(); return; }
-  if (a === 'close-event') { state.marketEvent = null; if (state.tab === 'buy' || state.tab === 'sell') renderMarket(state.tab); return; }
-  if (a === 'open-trade') { const ad = state.ads.find(x => x.id === +el.dataset.ad); openTradeModal(ad); return; }
-  if (a === 'open-order') { state.openOrderId = el.dataset.order; renderOrderModal(); if (state.tab === 'orders') renderOrders(); renderBadges(); return; }
-  if (a === 'open-merchant') { openMerchantModal(el.dataset.merchant); return; }
-  if (a === 'open-notifications') { openNotificationsModal(); return; }
-  if (a === 'open-notification') {
-    const n = state.notifications.find(x => x.id === +el.dataset.notif);
-    if (n) { n.read = true; renderBell(); }
-    if (el.dataset.order) { state.openOrderId = el.dataset.order; renderOrderModal(); }
-    else openNotificationsModal();
-    return;
-  }
-  if (a === 'read-all') { state.notifications.forEach(n => n.read = true); renderBell(); openNotificationsModal(); return; }
-  if (a === 'toggle-fav') {
-    toggleFav(el.dataset.name);
-    if (el.dataset.closeAfter) { openMerchantModal(el.dataset.name); return; }
-    if (state.tab === 'buy' || state.tab === 'sell') renderMarket(state.tab);
-    return;
-  }
-  if (a === 'order-op') { orderAction(el.dataset.order, el.dataset.op); return; }
-  if (a === 'order-help') { const order = state.orders.find(o => o.id === state.openOrderId); if (order) orderHelp(order); return; }
-  if (a === 'send-msg') { sendChat(el.dataset.order); return; }
-  if (a === 'qr') { sendChat(state.openOrderId, el.dataset.text); return; }
-  if (a === 'copy-req') {
-    const order = state.orders.find(o => o.id === el.dataset.order);
-    if (!order) return;
-    const text = `Сумма: ${rubF(order.rub)}\nБанк: ${order.method}\nКарта: ${order.merchant.req.card}\nТелефон: ${order.merchant.req.phone}\nСчёт: ${order.merchant.req.account}\nПолучатель: ${order.merchant.name}`;
-    const cb = el;
-    const doFeedback = () => {
-      cb.classList.add('copied');
-      cb.textContent = '✓ Скопировано';
-      setTimeout(() => { cb.classList.remove('copied'); cb.textContent = 'Копировать'; }, 1500);
-    };
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(() => { doFeedback(); toast('Реквизиты скопированы', 'ok'); }).catch(() => toast('Ошибка копирования', 'err'));
-    } else {
-      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-      doFeedback(); toast('Реквизиты скопированы', 'ok');
-    }
-    return;
-  }
-  if (a === 'rate') {
-    const order = state.orders.find(o => o.id === state.openOrderId);
-    if (!order) return;
-    order.reviewStars = +el.dataset.v;
-    $$('#reviewStars span').forEach((s, i) => s.classList.toggle('on', i < order.reviewStars));
-    return;
-  }
-  if (a === 'submit-review') {
-    const order = state.orders.find(o => o.id === el.dataset.order);
-    if (!order) return;
-    const stars = order.reviewStars || 5;
-    const text = ($('#reviewText')?.value || '').trim() || 'Без комментария';
-    if (!state.reviews[order.merchant.name]) state.reviews[order.merchant.name] = [];
-    state.reviews[order.merchant.name].unshift({ stars, text, time: nowTime(), ts: Date.now(), from: 'Вы' });
-    order.reviewed = true;
-    order.merchant.rating = (order.merchant.rating * order.merchant.trades + stars) / (order.merchant.trades + 1);
-    order.merchant.trades += 1;
-    toast('Отзыв оставлен', 'ok');
-    checkMissions();
-    refreshOrderUI(order);
-    return;
-  }
-  if (a === 'download-poster') { const order = state.orders.find(o => o.id === el.dataset.order); if (order) downloadPoster(order); return; }
-  if (a === 'export-csv') { exportCSV(); return; }
-  if (a === 'orders-page') { state.ordersPage = +el.dataset.page; renderOrders(); return; }
-  if (a === 'del-ad') { state.myAds = state.myAds.filter(x => x.id !== +el.dataset.ad); save(); toast('Объявление удалено'); renderMyAds(); return; }
-  if (a === 'restock-ad') {
-    const ad = state.myAds.find(x => x.id === +el.dataset.ad);
-    if (!ad) return;
-    ad.amount = ad.originalAmount || 1000; ad.createdAt = Date.now();
-    save(); toast('Объявление обновлено', 'ok'); renderMyAds();
-    return;
-  }
-  if (a === 'open-price-alert') { openPriceAlertModal(); return; }
-  if (a === 'add-alert') {
-    const price = parseFloat($('#alertPrice').value);
-    if (!price || price <= 0) return toast('Введите цену', 'err');
-    const dir = $('#modalRoot')._alertDir || 'below';
-    state.priceAlerts.push({ price, direction: dir, created: Date.now() });
-    save(); toast(`Алерт: ${dir === 'below' ? '↓' : '↑'} ${n2(price)} ₽`, 'ok'); openPriceAlertModal();
-    return;
-  }
-  if (a === 'del-alert') { state.priceAlerts.splice(+el.dataset.idx, 1); save(); openPriceAlertModal(); return; }
-  if (a === 'toggle-theme') { applyTheme(state.theme === 'dark' ? 'light' : 'dark'); return; }
-  if (a === 'toggle-theme-switch') { applyTheme(state.theme === 'dark' ? 'light' : 'dark'); renderProfile(); return; }
-  if (a === 'toggle-hide') { state.hiddenBalance = !state.hiddenBalance; renderWallet(); save(); return; }
-  if (a === 'toggle-hide-switch') { state.hiddenBalance = !state.hiddenBalance; renderWallet(); renderProfile(); save(); return; }
-  if (a === 'toggle-sound') { state.sound = !state.sound; renderProfile(); save(); if (state.sound) beep(660, 0.12, 0.06); toast(state.sound ? 'Звук включён' : 'Звук выключен'); return; }
-  if (a === 'toggle-sms') { state.smsSim = !state.smsSim; renderProfile(); save(); toast(state.smsSim ? 'СМС включена' : 'СМС выключена'); return; }
-  if (a === 'reset') {
-    askConfirm({ title: 'Сбросить всё?', message: 'Баланс, сделки, объявления и достижения будут удалены.', yesLabel: 'Сбросить', danger: true })
-      .then(ok => { if (!ok) return; localStorage.removeItem(SAVE_KEY); location.reload(); });
-    return;
-  }
-  if (a === 'onboard-next') {
-    if (onboardIdx < ONBOARD_STEPS.length - 1) { onboardIdx++; renderOnboard(); } else closeOnboarding();
-    return;
-  }
-  if (a === 'onboard-prev') { if (onboardIdx > 0) { onboardIdx--; renderOnboard(); } return; }
-});
-
-document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') { if (e.key === 'Escape') closeModal(); return; }
-  if (e.key === 'Escape') { closeModal(); return; }
-  if (e.ctrlKey && e.key === 'k') { e.preventDefault(); const s = $('#fSearch'); if (s) s.focus(); return; }
-  if (e.ctrlKey && e.key === 'n') { e.preventDefault(); openNotificationsModal(); return; }
-  const tabMap = { '1': 'buy', '2': 'sell', '3': 'myads', '4': 'orders', '5': 'profile' };
-  if (tabMap[e.key]) {
-    $$('#tabs button, .mobile-nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === tabMap[e.key]));
-    state.tab = tabMap[e.key]; renderAll();
-  }
-});
-
-$$('#tabs button, .mobile-nav button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    $$('#tabs button, .mobile-nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === btn.dataset.tab));
-    state.tab = btn.dataset.tab; state.ordersPage = 1; renderAll();
-  });
-});
-
-/* ============ INIT ============ */
-load();
-applyTheme(state.theme);
-updateStreak();
-genAds();
-for (let i = 0; i < 10; i++) state.priceHistory.push({ t: Date.now() - (10 - i) * 30000, p: getAvgMarketPrice() + rnd(-0.3, 0.3) });
-renderAll();
-renderBell();
-if (!state.onboarded) showOnboarding();
-
-setInterval(tick, 1000);
-setInterval(maybeIncomingOrder, 22000);
-setInterval(() => {
-  if (state.tab !== 'buy' && state.tab !== 'sell') return;
-  const ad = pick(state.ads);
-  if (!ad) return;
-  const old = ad.price;
-  ad.price = +Math.max(88, ad.price + rnd(-0.06, 0.06)).toFixed(2);
-  ad.trend = ad.price >= old ? 'up' : 'down';
-  updateAdPricesInDOM();
-  pushPriceHistory();
-  renderSparkline();
-}, 5000);
-setInterval(triggerMarketEvent, 90000);
-</script>
-</body>
-</html>
-</html>
 
+"""
+Telegram-бот «Перекуп вещей» — маркетплейс для покупки/продажи вещей.
+Один файл. Запуск: python bot.py
+"""
+
+import asyncio
+import logging
+import os
+from datetime import datetime
+
+import aiosqlite
+from aiogram import Bot, Dispatcher, F, Router
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+from aiogram.filters import Command, CommandStart
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import (
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    Message,
+    ReplyKeyboardMarkup,
+)
+from dotenv import load_dotenv
+
+# =========================================================
+# КОНФИГ
+# =========================================================
+load_dotenv()
+
+BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+ADMIN_IDS = [int(x.strip()) for x in os.getenv("ADMIN_IDS", "").split(",") if x.strip()]
+DB_PATH = "market.db"
+
+CATEGORIES = ["📱 Электроника", "👕 Одежда", "🪑 Мебель", "📚 Книги", "🎁 Другое"]
+
+# =========================================================
+# БАЗА ДАННЫХ
+# =========================================================
+async def init_db():
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.executescript("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY,
+                username TEXT,
+                full_name TEXT,
+                phone TEXT,
+                created_at TEXT,
+                banned INTEGER DEFAULT 0
+            );
+            CREATE TABLE IF NOT EXISTS items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                seller_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT,
+                price REAL NOT NULL,
+                category TEXT NOT NULL,
+                photo_id TEXT,
+                status TEXT DEFAULT 'active',
+                created_at TEXT
+            );
+        """)
+        await db.commit()
+
+
+async def add_user(user_id, username, full_name):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            "INSERT OR IGNORE INTO users (id, username, full_name, created_at) VALUES (?, ?, ?, ?)",
+            (user_id, username, full_name, datetime.now().isoformat()),
+        )
+        await db.execute(
+            "UPDATE users SET username = ?, full_name = ? WHERE id = ?",
+            (username, full_name, user_id),
+        )
+        await db.commit()
+
+
+async def get_user(user_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT * FROM users WHERE id = ?", (user_id,)) as cur:
+            row = await cur.fetchone()
+            return dict(row) if row else None
+
+
+async def set_phone(user_id, phone):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("UPDATE users SET phone = ? WHERE id = ?", (phone, user_id))
+        await db.commit()
+
+
+async def create_item(seller_id, name, description, price, category, photo_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        cur = await db.execute(
+            "INSERT INTO items (seller_id, name, description, price, category, photo_id, created_at)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (seller_id, name, description, price, category, photo_id, datetime.now().isoformat()),
+        )
+        await db.commit()
+        return cur.lastrowid
+
+
+async def get_item(item_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT * FROM items WHERE id = ?", (item_id,)) as cur:
+            row = await cur.fetchone()
+            return dict(row) if row else None
+
+
+async def get_items_by_category(category):
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT * FROM items WHERE category = ? AND status = 'active' ORDER BY id DESC",
+            (category,),
+        ) as cur:
+            return [dict(r) for r in await cur.fetchall()]
+
+
+async def get_user_items(user_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT * FROM items WHERE seller_id = ? ORDER BY id DESC", (user_id,)
+        ) as cur:
+            return [dict(r) for r in await cur.fetchall()]
+
+
+async def delete_item(item_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("DELETE FROM items WHERE id = ?", (item_id,))
+        await db.commit()
+
+
+async def get_stats():
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT COUNT(*) FROM users") as cur:
+            users = (await cur.fetchone())[0]
+        async with db.execute("SELECT COUNT(*) FROM items") as cur:
+            items = (await cur.fetchone())[0]
+        async with db.execute("SELECT COUNT(*) FROM items WHERE status = 'active'") as cur:
+            active = (await cur.fetchone())[0]
+        return {"users": users, "items": items, "active": active}
+
+
+async def get_all_user_ids():
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT id FROM users WHERE banned = 0") as cur:
+            return [r[0] for r in await cur.fetchall()]
+
+
+# =========================================================
+# КЛАВИАТУРЫ
+# =========================================================
+def main_menu(is_admin=False):
+    buttons = [
+        [KeyboardButton(text="🛒 Купить"), KeyboardButton(text="💰 Продать")],
+        [KeyboardButton(text="📦 Мои объявления"), KeyboardButton(text="👤 Профиль")],
+    ]
+    if is_admin:
+        buttons.append([KeyboardButton(text="⚙️ Админ-панель")])
+    return ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True)
+
+
+def categories_kb(prefix: str):
+    buttons = [[InlineKeyboardButton(text=c, callback_data=f"{prefix}:{c}")] for c in CATEGORIES]
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def items_list_kb(items, page, prefix, category):
+    per_page = 5
+    total_pages = max(1, (len(items) + per_page - 1) // per_page)
+    start, end = page * per_page, min(page * per_page + per_page, len(items))
+
+    buttons = []
+    for item in items[start:end]:
+        price = int(item["price"]) if item["price"] == int(item["price"]) else item["price"]
+        buttons.append([
+            InlineKeyboardButton(
+                text=f"{item['name'][:35]} — {price}₽",
+                callback_data=f"item:{item['id']}",
+            )
+        ])
+
+    nav = []
+    if page > 0:
+        nav.append(InlineKeyboardButton(text="◀️", callback_data=f"page:{prefix}:{category}:{page-1}"))
+    nav.append(InlineKeyboardButton(text=f"{page+1}/{total_pages}", callback_data="noop"))
+    if end < len(items):
+        nav.append(InlineKeyboardButton(text="▶️", callback_data=f"page:{prefix}:{category}:{page+1}"))
+    buttons.append(nav)
+    buttons.append([InlineKeyboardButton(text="🔙 К категориям", callback_data=f"cats:{prefix}")])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+# =========================================================
+# FSM СОСТОЯНИЯ
+# =========================================================
+class SellItem(StatesGroup):
+    photo = State()
+    name = State()
+    description = State()
+    price = State()
+    category = State()
+
+
+class ProfileStates(StatesGroup):
+    phone = State()
+
+
+class AdminStates(StatesGroup):
+    broadcast = State()
+
+
+# =========================================================
+# РОУТЕР
+# =========================================================
+router = Router()
+
+
+# ---------- START ----------
+@router.message(CommandStart())
+async def cmd_start(message: Message):
+    user = message.from_user
+    await add_user(user.id, user.username, user.full_name)
+    db_user = await get_user(user.id)
+    if db_user and db_user["banned"]:
+        await message.answer("⛔ Вы заблокированы в этом боте.")
+        return
+
+    is_admin = user.id in ADMIN_IDS
+    await message.answer(
+        f"👋 Привет, <b>{user.first_name}</b>!\n\n"
+        f"Добро пожаловать в <b>Перекуп Вещей</b> — маркетплейс для покупки "
+        f"и продажи вещей.\n\n"
+        f"🛒 <b>Купить</b> — просмотреть объявления\n"
+        f"💰 <b>Продать</b> — разместить объявление\n"
+        f"📦 <b>Мои объявления</b> — управление вашими товарами\n"
+        f"👤 <b>Профиль</b> — данные и статистика",
+        reply_markup=main_menu(is_admin),
+    )
+
+
+# ---------- ПРОДАЖА ----------
+@router.message(F.text == "💰 Продать")
+async def sell_start(message: Message, state: FSMContext):
+    user = await get_user(message.from_user.id)
+    if not user:
+        await message.answer("Сначала нажмите /start")
+        return
+    if user["banned"]:
+        await message.answer("⛔ Вы заблокированы.")
+        return
+    await state.set_state(SellItem.photo)
+    await message.answer(
+        "📸 Отправьте фото товара\n\n"
+        "<i>Если фото нет — отправьте /skip</i>"
+    )
+
+
+@router.message(SellItem.photo, F.photo)
+async def sell_photo(message: Message, state: FSMContext):
+    await state.update_data(photo=message.photo[-1].file_id)
+    await state.set_state(SellItem.name)
+    await message.answer("✏️ Введите название товара (до 60 символов)")
+
+
+@router.message(SellItem.photo, Command("skip"))
+async def sell_skip_photo(message: Message, state: FSMContext):
+    await state.update_data(photo=None)
+    await state.set_state(SellItem.name)
+    await message.answer("✏️ Введите название товара (до 60 символов)")
+
+
+@router.message(SellItem.photo)
+async def sell_photo_invalid(message: Message):
+    await message.answer("❌ Отправьте фото или /skip")
+
+
+@router.message(SellItem.name, F.text)
+async def sell_name(message: Message, state: FSMContext):
+    name = message.text.strip()
+    if len(name) > 60:
+        await message.answer("❌ Максимум 60 символов.")
+        return
+    await state.update_data(name=name)
+    await state.set_state(SellItem.description)
+    await message.answer("📝 Введите описание (до 500 символов)")
+
+
+@router.message(SellItem.description, F.text)
+async def sell_desc(message: Message, state: FSMContext):
+    desc = message.text.strip()
+    if len(desc) > 500:
+        await message.answer("❌ Максимум 500 символов.")
+        return
+    await state.update_data(description=desc)
+    await state.set_state(SellItem.price)
+    await message.answer("💵 Введите цену в рублях (например, 1500)")
+
+
+@router.message(SellItem.price, F.text)
+async def sell_price(message: Message, state: FSMContext):
+    try:
+        price = float(message.text.replace(",", ".").replace(" ", ""))
+        if price <= 0:
+            raise ValueError
+    except ValueError:
+        await message.answer("❌ Введите корректную цену (например, 1500)")
+        return
+    await state.update_data(price=price)
+    await state.set_state(SellItem.category)
+    await message.answer("📂 Выберите категорию:", reply_markup=categories_kb("sellcat"))
+
+
+@router.callback_query(SellItem.category, F.data.startswith("sellcat:"))
+async def sell_category(cb: CallbackQuery, state: FSMContext):
+    category = cb.data.split(":", 1)[1]
+    data = await state.get_data()
+    item_id = await create_item(
+        seller_id=cb.from_user.id,
+        name=data["name"],
+        description=data["description"],
+        price=data["price"],
+        category=category,
+        photo_id=data.get("photo"),
+    )
+    await state.clear()
+    await cb.message.edit_text(f"✅ Объявление <b>#{item_id}</b> опубликовано!")
+    await cb.message.answer(
+        "Что дальше?", reply_markup=main_menu(cb.from_user.id in ADMIN_IDS)
+    )
+    await cb.answer()
+
+
+# ---------- ПОКУПКА ----------
+@router.message(F.text == "🛒 Купить")
+async def buy_menu(message: Message):
+    await message.answer("📂 Выберите категорию:", reply_markup=categories_kb("buycat"))
+
+
+async def _render_category(cb: CallbackQuery, category: str, page: int = 0):
+    items = await get_items_by_category(category)
+    if not items:
+        text = f"В категории <b>{category}</b> пока нет товаров 😔"
+        kb = categories_kb("buycat")
+    else:
+        text = f"📦 <b>{category}</b>\n\nНайдено товаров: {len(items)}"
+        kb = items_list_kb(items, page, "buycat", category)
+
+    if cb.message.photo or cb.message.video or cb.message.document:
+        await cb.message.delete()
+        await cb.message.answer(text, reply_markup=kb)
+    else:
+        try:
+            await cb.message.edit_text(text, reply_markup=kb)
+        except Exception:
+            await cb.message.answer(text, reply_markup=kb)
+
+
+@router.callback_query(F.data.startswith("buycat:"))
+async def buy_category(cb: CallbackQuery):
+    category = cb.data.split(":", 1)[1]
+    await _render_category(cb, category, 0)
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("page:"))
+async def paginate(cb: CallbackQuery):
+    _, prefix, category, page = cb.data.split(":")
+    if prefix == "buycat":
+        await _render_category(cb, category, int(page))
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("cats:"))
+async def back_to_categories(cb: CallbackQuery):
+    prefix = cb.data.split(":", 1)[1]
+    try:
+        await cb.message.edit_text("📂 Выберите категорию:", reply_markup=categories_kb(prefix))
+    except Exception:
+        await cb.message.answer("📂 Выберите категорию:", reply_markup=categories_kb(prefix))
+    await cb.answer()
+
+
+@router.callback_query(F.data == "noop")
+async def noop(cb: CallbackQuery):
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("item:"))
+async def view_item(cb: CallbackQuery):
+    item_id = int(cb.data.split(":")[1])
+    item = await get_item(item_id)
+    if not item or item["status"] != "active":
+        await cb.answer("Товар больше не доступен", show_alert=True)
+        return
+
+    seller = await get_user(item["seller_id"])
+    price = int(item["price"]) if item["price"] == int(item["price"]) else item["price"]
+    text = (
+        f"<b>{item['name']}</b>\n\n"
+        f"💰 Цена: <b>{price} ₽</b>\n"
+        f"📂 Категория: {item['category']}\n\n"
+        f"📝 {item['description']}\n\n"
+        f"👤 Продавец: {seller['full_name']}"
+    )
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💬 Связаться с продавцом", callback_data=f"contact:{item_id}")],
+        [InlineKeyboardButton(text="🔙 Назад", callback_data=f"buycat:{item['category']}")],
+    ])
+
+    if item["photo_id"]:
+        await cb.message.answer_photo(item["photo_id"], caption=text, reply_markup=kb)
+    else:
+        await cb.message.answer(text, reply_markup=kb)
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("contact:"))
+async def contact_seller(cb: CallbackQuery):
+    item_id = int(cb.data.split(":")[1])
+    item = await get_item(item_id)
+    if not item:
+        await cb.answer("Товар не найден", show_alert=True)
+        return
+    seller = await get_user(item["seller_id"])
+
+    parts = []
+    if seller["username"]:
+        parts.append(f"💬 @{seller['username']}")
+    if seller["phone"]:
+        parts.append(f"📞 {seller['phone']}")
+
+    if parts:
+        await cb.message.answer(
+            f"📞 <b>Контакты продавца:</b>\n" + "\n".join(parts) +
+            f"\n\nТовар: <b>{item['name']}</b>"
+        )
+    else:
+        await cb.message.answer(
+            "⚠️ Продавец не указал контакты. Попробуйте связаться через его профиль в Telegram."
+        )
+
+    try:
+        buyer = cb.from_user
+        buyer_contact = f"@{buyer.username}" if buyer.username else f"ID: {buyer.id}"
+        await cb.bot.send_message(
+            seller["id"],
+            f"🔔 <b>Новый интерес к вашему товару!</b>\n\n"
+            f"📦 Товар: {item['name']}\n"
+            f"👤 Покупатель: {buyer.full_name} ({buyer_contact})\n\n"
+            f"Свяжитесь с покупателем!",
+        )
+    except Exception:
+        pass
+    await cb.answer("✅ Контакты отправлены")
+
+
+# ---------- МОИ ОБЪЯВЛЕНИЯ ----------
+@router.message(F.text == "📦 Мои объявления")
+async def my_items(message: Message):
+    items = await get_user_items(message.from_user.id)
+    if not items:
+        await message.answer(
+            "У вас пока нет объявлений.\nНажмите «💰 Продать», чтобы добавить первое."
+        )
+        return
+
+    text = "📦 <b>Ваши объявления:</b>\n\n"
+    buttons = []
+    for item in items:
+        price = int(item["price"]) if item["price"] == int(item["price"]) else item["price"]
+        status = "🟢" if item["status"] == "active" else "⚪️"
+        text += f"{status} <b>{item['name']}</b> — {price}₽ ({item['category']})\n"
+        buttons.append([
+            InlineKeyboardButton(
+                text=f"🗑 Удалить «{item['name'][:20]}»",
+                callback_data=f"del:{item['id']}",
+            )
+        ])
+    await message.answer(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
+
+
+@router.callback_query(F.data.startswith("del:"))
+async def delete_handler(cb: CallbackQuery):
+    item_id = int(cb.data.split(":")[1])
+    item = await get_item(item_id)
+    if not item or item["seller_id"] != cb.from_user.id:
+        await cb.answer("Нет доступа", show_alert=True)
+        return
+    await delete_item(item_id)
+    await cb.message.edit_text("🗑 Объявление удалено")
+    await cb.answer("Удалено")
+
+
+# ---------- ПРОФИЛЬ ----------
+@router.message(F.text == "👤 Профиль")
+async def profile(message: Message):
+    user = await get_user(message.from_user.id)
+    if not user:
+        await message.answer("Начните с /start")
+        return
+
+    items = await get_user_items(user["id"])
+    active = sum(1 for i in items if i["status"] == "active")
+    sold = sum(1 for i in items if i["status"] == "sold")
+
+    text = (
+        f"👤 <b>Профиль</b>\n\n"
+        f"Имя: {user['full_name']}\n"
+        f"ID: <code>{user['id']}</code>\n"
+        f"Активных объявлений: {active}\n"
+        f"Продано: {sold}\n"
+    )
+    if user["phone"]:
+        text += f"📞 Телефон: {user['phone']}\n"
+    else:
+        text += "📞 Телефон: не указан\n"
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📞 Изменить телефон", callback_data="edit_phone")]
+    ])
+    await message.answer(text, reply_markup=kb)
+
+
+@router.callback_query(F.data == "edit_phone")
+async def edit_phone(cb: CallbackQuery, state: FSMContext):
+    await state.set_state(ProfileStates.phone)
+    await cb.message.answer("📞 Отправьте номер телефона (например, +79991234567)")
+    await cb.answer()
+
+
+@router.message(ProfileStates.phone, F.text)
+async def save_phone(message: Message, state: FSMContext):
+    phone = message.text.strip()
+    if len(phone) < 5:
+        await message.answer("❌ Введите корректный номер телефона")
+        return
+    await set_phone(message.from_user.id, phone)
+    await state.clear()
+    await message.answer(
+        "✅ Телефон сохранён", reply_markup=main_menu(message.from_user.id in ADMIN_IDS)
+    )
+
+
+# ---------- АДМИН ----------
+@router.message(F.text == "⚙️ Админ-панель", F.from_user.id.in_(ADMIN_IDS))
+async def admin_panel(message: Message):
+    stats = await get_stats()
+    text = (
+        f"⚙️ <b>Админ-панель</b>\n\n"
+        f"👥 Пользователей: {stats['users']}\n"
+        f"📦 Всего объявлений: {stats['items']}\n"
+        f"🟢 Активных: {stats['active']}\n"
+    )
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📢 Рассылка", callback_data="broadcast")]
+    ])
+    await message.answer(text, reply_markup=kb)
+
+
+@router.callback_query(F.data == "broadcast", F.from_user.id.in_(ADMIN_IDS))
+async def broadcast_start(cb: CallbackQuery, state: FSMContext):
+    await state.set_state(AdminStates.broadcast)
+    await cb.message.answer("📢 Отправьте текст для рассылки:")
+    await cb.answer()
+
+
+@router.message(AdminStates.broadcast, F.text)
+async def broadcast_send(message: Message, state: FSMContext):
+    await state.clear()
+    user_ids = await get_all_user_ids()
+    sent = failed = 0
+    for uid in user_ids:
+        try:
+            await message.bot.send_message(uid, message.text)
+            sent += 1
+        except Exception:
+            failed += 1
+    await message.answer(f"✅ Рассылка завершена\nОтправлено: {sent}\nОшибок: {failed}")
+
+
+# =========================================================
+# ЗАПУСК
+# =========================================================
+async def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+    if not BOT_TOKEN:
+        raise RuntimeError("BOT_TOKEN не задан. Создайте .env с BOT_TOKEN=...")
+
+    bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    dp = Dispatcher()
+    dp.include_router(router)
+
+    await init_db()
+    await bot.delete_webhook(drop_pending_updates=True)
+    logging.info("Бот запущен")
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        print("Бот остановлен")
